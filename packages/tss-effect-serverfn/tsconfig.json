@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "vite/client"],
+    "plugins": [
+      {
+        "name": "@effect/language-service",
+        "namespaceImportPackages": ["effect", "@effect/*"],
+        "allowedUnstableApis": [
+          "effect/ErrorReporter",
+          "effect/http/HttpServerRequest"
+        ]
+      }
+    ]
+  },
+  "include": ["src"]
+}

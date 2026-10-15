@@ -1,0 +1,69 @@
+{
+  "name": "tss-effect-serverfn",
+  "version": "0.0.0",
+  "description": "Typed Effect execution and safe failure boundaries for TanStack Start server functions.",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RyanCallahan312/tss-effect-serverfn.git",
+    "directory": "packages/tss-effect-serverfn"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "src"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "./src/server.ts",
+    "./dist/server.js"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./compiler-runtime": "./dist/compiler-runtime.js",
+    "./server": "./dist/server.js",
+    "./vite": "./dist/vite.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsc -b tsconfig.json",
+    "dev": "tsc -b tsconfig.json --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.json --tsBuildInfoFile .cache/typecheck.tsbuildinfo && tsc -p tsconfig.test.json && tsc -p tsconfig.fixtures.json",
+    "test": "vitest run && node --test test/*.test.mjs",
+    "prepack": "bun run build"
+  },
+  "dependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/types": "^7.29.8",
+    "@standard-schema/spec": "^1.1.0"
+  },
+  "devDependencies": {
+    "@effect/vitest": "^4.0.5",
+    "@tanstack/react-router": "1.170.44",
+    "@tanstack/start-storage-context": "^1.167.39",
+    "@types/babel__core": "^7.20.5",
+    "@types/node": "^26.6.5",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
+  },
+  "peerDependencies": {
+    "@tanstack/react-start": "^1.169.2",
+    "@tanstack/router-core": "^1.171.37",
+    "effect": "^4.0.5",
+    "vite": "^8.3.4"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
