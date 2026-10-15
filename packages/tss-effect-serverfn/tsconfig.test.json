@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "incremental": false,
+    "noEmit": true,
+    "rootDir": ".",
+    "lib": ["ES2024"],
+    "types": ["node", "vite/client"],
+    "plugins": [
+      {
+        "name": "@effect/language-service",
+        "namespaceImportPackages": ["effect", "@effect/*"],
+        "allowedUnstableApis": [
+          "@effect/vitest",
+          "effect/ErrorReporter",
+          "effect/http/HttpServerRequest",
+          "effect/Effect#withErrorReporting"
+        ]
+      }
+    ],
+    "disableSourceOfProjectReferenceRedirect": false
+  },
+  "include": ["src", "test/**/*.ts", "vitest.config.ts"],
+  "exclude": ["test/type-fixtures/**"]
+}
