@@ -1,0 +1,5 @@
+{
+  "$schema": "./node_modules/@effect/tsgo/schema.json",
+  "files": [],
+  "references": [{ "path": "./packages/tss-effect-serverfn" }]
+}

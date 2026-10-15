@@ -1,0 +1,14 @@
+node_modules/
+.turbo/
+.cache/
+dist/
+coverage/
+*.tsbuildinfo
+*.tgz
+.DS_Store
+.env
+.env.*
+!.env.example
+routeTree.gen.ts
+playwright-report/
+test-results/

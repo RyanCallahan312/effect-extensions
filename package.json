@@ -1,0 +1,45 @@
+{
+  "name": "tss-effect-serverfn-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "ultracite check",
+    "format": "ultracite fix",
+    "typecheck": "turbo run typecheck && tsc -p e2e/tsconfig.json",
+    "test": "turbo run test",
+    "test:e2e": "turbo run build && playwright test",
+    "check": "bun run lint && bun run typecheck && bun run test",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "bun run check && bun run build && changeset publish",
+    "fix": "ultracite fix",
+    "prepare": "effect-tsgo patch --typescript"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3",
+    "@effect/tsgo": "0.53.0",
+    "@oxlint/plugins": "1.88.0",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "oxfmt": "^0.73.0",
+    "oxlint": "1.88.0",
+    "turbo": "^2.11.8",
+    "typescript": "^7.0.2",
+    "ultracite": "8.0.1"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "bun@1.3.13",
+  "intent": {
+    "skills": [
+      "*"
+    ]
+  }
+}
