@@ -3,11 +3,11 @@
   "references": {
     "effect": {
       "repository": "Effect-TS/effect",
-      "description": "Use for Effect APIs, implementation details, documentation, and examples."
+      "description": "Use for Effect APIs, implementation details, documentation, and examples.",
     },
     "tanstack-start": {
       "repository": "TanStack/router",
-      "description": "Use for TanStack Start and Router APIs, server functions, documentation, and examples."
-    }
-  }
+      "description": "Use for TanStack Start and Router APIs, server functions, documentation, and examples.",
+    },
+  },
 }
