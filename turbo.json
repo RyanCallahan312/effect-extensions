@@ -1,6 +1,10 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "globalDependencies": ["tsconfig.json", "tsconfig.base.json"],
+  "globalDependencies": [
+    "tsconfig.json",
+    "tsconfig.base.json",
+    "examples/playground.css"
+  ],
   "tasks": {
     "//#lint": {
       "outputs": []

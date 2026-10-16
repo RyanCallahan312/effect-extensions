@@ -1,5 +1,122 @@
 import { expect, test } from "./fixtures.ts";
 
+test("mobile presets bring the actual result into view without horizontal overflow", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.goto("/");
+  await page
+    .getByRole("button", { exact: true, name: "Server defect" })
+    .click();
+  await expect(page.getByRole("alert")).toHaveText("Something went wrong");
+  await expect(page.getByLabel("Response payload")).toBeInViewport();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+});
+
+test("scenario buttons display exact public failures, recovery, and successful saves", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const status = page.getByRole("status", { name: "Request status" });
+  await expect(status).toHaveText("Ready");
+  const before = (await page.getByLabel("Saved title").textContent()) ?? "";
+
+  // oxlint-disable eslint/no-await-in-loop -- These scenarios must run sequentially against the same service state to verify failure/recovery transitions.
+  for (const scenario of [
+    {
+      id: "1",
+      label: "Invalid input",
+      payload: { code: "INVALID_INPUT", message: "Invalid input" },
+      title: "",
+    },
+    {
+      id: "missing",
+      label: "Missing note",
+      // oxlint-disable-next-line anti-slop-effect/no-manual-tagged-construction -- Assert the serialized public wire contract, not an Effect error instance.
+      payload: { _tag: "NoteMissing", message: "Note does not exist" },
+      title: "Missing note example",
+    },
+    {
+      id: "1",
+      label: "Server defect",
+      payload: { code: "INTERNAL", message: "Something went wrong" },
+      title: "crash",
+    },
+  ]) {
+    await page
+      .getByRole("button", { exact: true, name: scenario.label })
+      .click();
+    await expect(status).toHaveText("Failure");
+    await expect(page.getByRole("alert")).toHaveText(scenario.payload.message);
+    expect(
+      JSON.parse(
+        (await page.getByLabel("Response payload").textContent()) ?? ""
+      )
+    ).toEqual(scenario.payload);
+    expect(
+      JSON.parse((await page.getByLabel("Submitted input").textContent()) ?? "")
+    ).toEqual({ id: scenario.id, title: scenario.title });
+    await expect(page.getByLabel("Note ID")).toHaveValue(scenario.id);
+    await expect(page.getByLabel("Title", { exact: true })).toHaveValue(
+      scenario.title
+    );
+    await expect(page.getByLabel("Saved title")).toHaveText(before);
+    await expect(
+      page.getByLabel("Recover missing notes with catchTag")
+    ).not.toBeChecked();
+    await expect(page.getByRole("status", { name: "Save status" })).toHaveCount(
+      0
+    );
+    await expect(page.locator("body")).not.toContainText(
+      "services-private-diagnostic"
+    );
+  }
+  // oxlint-enable eslint/no-await-in-loop
+
+  await page
+    .getByRole("button", { exact: true, name: "Recover missing note" })
+    .click();
+  await expect(status).toHaveText("Success");
+  await expect(page.getByRole("status", { name: "Save status" })).toHaveText(
+    "Skipped missing note"
+  );
+  expect(
+    JSON.parse((await page.getByLabel("Response payload").textContent()) ?? "")
+  ).toEqual({ saved: false, title: null });
+  await expect(
+    page.getByLabel("Recover missing notes with catchTag")
+  ).toBeChecked();
+  await expect(page.getByLabel("Saved title")).toHaveText(before);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(
+    page.getByText("POST · renameNoteIfPresent", { exact: true })
+  ).toBeVisible();
+
+  await page
+    .getByRole("button", { exact: true, name: "Successful save" })
+    .click();
+  await expect(page.getByRole("status", { name: "Save status" })).toHaveText(
+    "Saved"
+  );
+  expect(
+    JSON.parse((await page.getByLabel("Response payload").textContent()) ?? "")
+  ).toEqual({ saved: true, title: "Saved from a preset" });
+  await expect(
+    page.getByLabel("Recover missing notes with catchTag")
+  ).not.toBeChecked();
+  await expect(page.getByLabel("Saved title")).toHaveText(
+    "Saved from a preset"
+  );
+  await page.reload();
+  await expect(page.getByLabel("Saved title")).toHaveText(
+    "Saved from a preset"
+  );
+});
+
 test("mutates the service, refreshes the loader, and persists across reloads", async ({
   page,
   request,

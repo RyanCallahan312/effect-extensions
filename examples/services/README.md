@@ -16,6 +16,8 @@ The handlers use `flow` and `Effect.fn`. The save pipeline uses `tap` to await t
 
 Try these failure cases:
 
+Use the **Try a scenario** buttons to run each case in one click, plus a successful save and a recovered missing note. Each preset fills the form and sets the recovery checkbox explicitly. **Latest request** shows the pending/success/failure state, submitted input, endpoint, and actual client-visible JSON, including public error codes or tags. The saved service state is displayed separately, so a failed or skipped request is not confused with a mutation.
+
 | Input | Result |
 | --- | --- |
 | Empty title | Schema rejection: `Invalid input`, HTTP 400 |

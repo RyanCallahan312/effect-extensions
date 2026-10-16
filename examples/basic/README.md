@@ -12,6 +12,8 @@ bun run --cwd examples/basic dev
 
 Open http://localhost:3000. The initial greeting is server-rendered. Submit a name and a positive numeric string: the piped Schema converts the string into a number and checks it before the handler runs. An invalid count, including `0`, produces a safe `Invalid input` message.
 
+The **Try a scenario** buttons fill and immediately submit a valid greeting, a non-numeric count, a zero count, or an empty name using the selected composition. **Latest request** shows pending/success/failure state, a snapshot of the submitted input, and the actual returned value or public error as formatted JSON. Validation errors include `code: "INVALID_INPUT"`; private Schema diagnostics are not exposed. The last successful greeting is kept separately and clearly labeled.
+
 Use **Composition** to compare equivalent endpoints:
 
 | Choice | Demonstrates |

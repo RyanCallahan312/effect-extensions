@@ -6,6 +6,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 
+import "../../../playground.css";
+
 export const Route = createRootRoute({
   component: () => (
     <html lang="en">
@@ -13,14 +15,7 @@ export const Route = createRootRoute({
         <HeadContent />
       </head>
       <body>
-        <main
-          style={{
-            fontFamily: "system-ui",
-            margin: "3rem auto",
-            maxWidth: "42rem",
-            padding: "1rem",
-          }}
-        >
+        <main>
           <nav>
             <Link to="/">Greeting</Link> · <Link to="/about">About</Link>
           </nav>
