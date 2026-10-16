@@ -9,12 +9,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@rc312/tss-effect-serverfn": "workspace:*",
     "@tanstack/react-router": "1.170.44",
     "@tanstack/react-start": "1.169.2",
     "effect": "^4.0.5",
     "react": "19.3.1",
-    "react-dom": "19.3.1",
-    "tss-effect-serverfn": "workspace:*"
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",

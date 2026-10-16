@@ -173,7 +173,7 @@ export type CreateEffectServerFn = <
 /**
  * Define a Start server function using an Effect Schema and an Effect handler.
  *
- * Requires `effectServerFns()` from `tss-effect-serverfn/vite`, installed before
+ * Requires `effectServerFns()` from `@rc312/tss-effect-serverfn/vite`, installed before
  * `tanstackStart()`, and execution middleware from `createEffectMiddleware`.
  * This value retains the native `createServerFn` identity; the plugin adapts
  * validators and handlers before Start performs extraction and RPC generation.

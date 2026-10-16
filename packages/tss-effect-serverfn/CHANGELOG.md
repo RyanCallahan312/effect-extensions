@@ -1,4 +1,4 @@
-# tss-effect-serverfn
+# @rc312/tss-effect-serverfn
 
 ## 0.1.0
 

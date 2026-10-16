@@ -206,7 +206,7 @@ Optional fields returned by `resolve`:
 
 An override is awaited after request-scope cleanup, with application services and request metadata. Its faults/timeouts cannot replace the business rejection. Use `Effect.tryPromise` and its signal for foreign reporters. Compose `ErrorReporter.report` explicitly if the override should also invoke native reporters. ErrorReporter and the HTTP request APIs are unstable in Effect 4.0.5.
 
-For outer framework reporting, `tss-effect-serverfn/server` exports:
+For outer framework reporting, `@rc312/tss-effect-serverfn/server` exports:
 
 - `getServerFnFailureCause(error)` — original server-local diagnostic Cause.
 - `getServerFnFailureDisposition(error)` — `{ capture, handled }`, or `undefined` for unrelated errors. Outer capture hooks should skip handled errors. Ownership does not imply guaranteed delivery.

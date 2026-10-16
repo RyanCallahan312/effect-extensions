@@ -1,4 +1,4 @@
-# tss-effect-serverfn
+# @rc312/tss-effect-serverfn
 
 Write TanStack Start server functions with **Effect Schemas and Effect handlers**. Call them with Start's normal Promise API.
 
@@ -7,7 +7,7 @@ Write TanStack Start server functions with **Effect Schemas and Effect handlers*
 In an existing **TanStack React Start** app using **Effect 4**:
 
 ```sh
-bun add tss-effect-serverfn 'effect@^4.0.5'
+bun add @rc312/tss-effect-serverfn 'effect@^4.0.5'
 ```
 
 ### 1. Register the Vite plugin
@@ -15,9 +15,9 @@ bun add tss-effect-serverfn 'effect@^4.0.5'
 Add `effectServerFns()` **before** `tanstackStart()` in your existing config. Keep your other plugins and your usual Vite dev/build commands.
 
 ```ts
+import { effectServerFns } from "@rc312/tss-effect-serverfn/vite";
 // vite.config.ts
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import { effectServerFns } from "tss-effect-serverfn/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -30,13 +30,13 @@ export default defineConfig({
 Create this file once. `createEffectMiddleware` runs your Effects and catches failures. This starter needs no application services and returns a safe fallback for unexpected failures.
 
 ```ts
-// src/effect-server-fn.ts
-import { createServerOnlyFn } from "@tanstack/react-start";
-import { Effect } from "effect";
 import {
   createEffectMiddleware,
   createEffectServerFn as base,
-} from "tss-effect-serverfn";
+} from "@rc312/tss-effect-serverfn";
+// src/effect-server-fn.ts
+import { createServerOnlyFn } from "@tanstack/react-start";
+import { Effect } from "effect";
 
 export const createEffectServerFn = base().middleware([
   createEffectMiddleware({

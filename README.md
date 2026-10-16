@@ -1,4 +1,4 @@
-# tss-effect-serverfn
+# @rc312/tss-effect-serverfn
 
 Effect Schemas and Effect-returning handlers for TanStack Start, with a Vite plugin that preserves the concise `.validator(schema).handler(() => effect)` syntax.
 
@@ -54,7 +54,7 @@ The suite runs both examples against Vite dev and production preview, using real
 
 ## Releases
 
-Before the first release, confirm the npm name is available, choose a license (currently `UNLICENSED`), and set the initial release version. Nothing is published automatically on push.
+The package is published as `@rc312/tss-effect-serverfn` under the MIT license. Nothing is published automatically on push.
 
 1. Run `bun run changeset` and commit the generated changeset with your changes.
 2. Run `bun run version-packages`, then `bun install` to refresh the lockfile. Commit the version changes, changelog, and lockfile to `main`.

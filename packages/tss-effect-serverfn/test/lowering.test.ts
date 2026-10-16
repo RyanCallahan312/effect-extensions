@@ -11,7 +11,7 @@ const id = fileURLToPath(
 );
 
 const imports =
-  'import { createEffectServerFn as base } from "tss-effect-serverfn";';
+  'import { createEffectServerFn as base } from "@rc312/tss-effect-serverfn";';
 
 const lower = (code: string) => {
   const plugin = effectServerFns();
@@ -61,7 +61,7 @@ describe("binding-aware lowering", () => {
 
   it("recognizes namespace imports and transparent configured factory re-exports", async () => {
     const namespace = await lower(
-      'import * as Adapter from "tss-effect-serverfn"; export const call = Adapter.createEffectServerFn().handler(() => program);'
+      'import * as Adapter from "@rc312/tss-effect-serverfn"; export const call = Adapter.createEffectServerFn().handler(() => program);'
     );
 
     expect(namespace).toMatchObject({

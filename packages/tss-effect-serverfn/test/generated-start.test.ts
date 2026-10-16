@@ -2,8 +2,8 @@ import { cp, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { effectServerFns } from "@rc312/tss-effect-serverfn/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import { effectServerFns } from "tss-effect-serverfn/vite";
 import { createBuilder } from "vite";
 import { describe, expect, it } from "vitest";
 
@@ -32,7 +32,7 @@ describe("generated Start HTTP handler", () => {
           resolve: {
             alias: [
               {
-                find: "tss-effect-serverfn/compiler-runtime",
+                find: "@rc312/tss-effect-serverfn/compiler-runtime",
                 replacement: path.join(
                   packageRoot,
                   directory,
@@ -40,7 +40,7 @@ describe("generated Start HTTP handler", () => {
                 ),
               },
               {
-                find: "tss-effect-serverfn",
+                find: "@rc312/tss-effect-serverfn",
                 replacement: path.join(
                   packageRoot,
                   directory,

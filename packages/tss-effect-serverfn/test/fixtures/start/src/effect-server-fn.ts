@@ -1,9 +1,9 @@
-import { createServerOnlyFn } from "@tanstack/react-start";
-import { Effect } from "effect";
 import {
   createEffectMiddleware,
   createEffectServerFn as base,
-} from "tss-effect-serverfn";
+} from "@rc312/tss-effect-serverfn";
+import { createServerOnlyFn } from "@tanstack/react-start";
+import { Effect } from "effect";
 
 export const createEffectServerFn = base().middleware([
   createEffectMiddleware({

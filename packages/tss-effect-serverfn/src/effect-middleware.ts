@@ -131,7 +131,7 @@ const makeBootstrapFailure = createServerOnlyFn(bootstrapFailure);
  * import {
  *   createEffectMiddleware,
  *   createEffectServerFn as base,
- * } from "tss-effect-serverfn";
+ * } from "@rc312/tss-effect-serverfn";
  *
  * export const createEffectServerFn = base().middleware([
  *   createEffectMiddleware({

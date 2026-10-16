@@ -4,7 +4,7 @@ import * as babel from "@babel/core";
 import * as t from "@babel/types";
 import type { Plugin } from "vite";
 
-const runtimeModule = "tss-effect-serverfn/compiler-runtime";
+const runtimeModule = "@rc312/tss-effect-serverfn/compiler-runtime";
 const builderMethods = new Set(["middleware", "validator", "handler"]);
 
 const staticName = (node: t.Node) => {
@@ -146,7 +146,7 @@ const createFactoryResolver = (
       importer: string,
       seen: ReadonlySet<string>
     ): Promise<boolean> {
-      if (source === "tss-effect-serverfn") {
+      if (source === "@rc312/tss-effect-serverfn") {
         return name === "createEffectServerFn";
       }
 
@@ -374,7 +374,7 @@ const lowerBuilderCalls = (
  * @example
  * ```ts
  * import { tanstackStart } from "@tanstack/react-start/plugin/vite";
- * import { effectServerFns } from "tss-effect-serverfn/vite";
+ * import { effectServerFns } from "@rc312/tss-effect-serverfn/vite";
  * import { defineConfig } from "vite";
  *
  * export default defineConfig({
@@ -401,7 +401,7 @@ export const effectServerFns = (): Plugin => {
       modules.clear();
     },
     enforce: "pre",
-    name: "tss-effect-serverfn",
+    name: "@rc312/tss-effect-serverfn",
     async transform(code, id) {
       if (
         !/\.[cm]?[jt]sx?(?:\?|$)/u.test(id) ||

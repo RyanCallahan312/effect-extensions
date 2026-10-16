@@ -1,5 +1,5 @@
 {
-  "name": "tss-effect-serverfn",
+  "name": "@rc312/tss-effect-serverfn",
   "version": "0.1.0",
   "description": "Typed Effect execution and safe failure boundaries for TanStack Start server functions.",
   "license": "MIT",
