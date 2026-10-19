@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RyanCallahan312/tss-effect-serverfn.git",
+    "url": "git+https://github.com/RyanCallahan312/effect-extensions.git",
     "directory": "packages/tss-effect-serverfn"
   },
   "files": [
@@ -32,9 +32,10 @@
   "scripts": {
     "build": "tsc -b tsconfig.json",
     "dev": "tsc -b tsconfig.json --watch",
-    "typecheck": "tsc --noEmit -p tsconfig.json --tsBuildInfoFile .cache/typecheck.tsbuildinfo && tsc -p tsconfig.test.json && tsc -p tsconfig.fixtures.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json --tsBuildInfoFile .cache/typecheck.tsbuildinfo && tsc -p tsconfig.test.json && tsc -p tsconfig.fixtures.json && tsc -p e2e/tsconfig.json",
     "test": "vitest run && node --test test/*.test.mjs",
-    "prepack": "bun run build"
+    "prepack": "bun run build",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@babel/core": "^7.29.7",
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@effect/vitest": "^4.0.5",
+    "@playwright/test": "^1.64.1",
     "@tanstack/react-router": "1.170.44",
     "@tanstack/start-storage-context": "^1.167.39",
     "@types/babel__core": "^7.20.5",

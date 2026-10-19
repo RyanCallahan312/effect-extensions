@@ -7,12 +7,12 @@ From the repository root:
 ```sh
 bun install
 bun run build
-bun run --cwd examples/services dev
+bun run --cwd packages/tss-effect-serverfn/examples/services dev
 ```
 
 Open http://localhost:3001. Save a new title for note `1`; the route loader refreshes, and reloading the page reads the same service state.
 
-The handlers use `flow` and `Effect.fn`. The save pipeline uses `tap` to await the mutation while retaining the service, `flatMap` to read the updated note, and `map` to construct the response. Enable **Recover missing notes with catchTag** to turn a missing ID into a successful `Skipped missing note` result. Invalid input and defects still reject. See the [composition guide](../../packages/tss-effect-serverfn/docs/composition.md#pipe-service-work-and-recover-a-business-error).
+The handlers use `flow` and `Effect.fn`. The save pipeline uses `tap` to await the mutation while retaining the service, `flatMap` to read the updated note, and `map` to construct the response. Enable **Recover missing notes with catchTag** to turn a missing ID into a successful `Skipped missing note` result. Invalid input and defects still reject. See the [composition guide](../../docs/composition.md#pipe-service-work-and-recover-a-business-error).
 
 Try these failure cases:
 
@@ -36,4 +36,4 @@ Start reading at:
 
 An application using resourceful Layers should also await `runtime.dispose()` in its deployment host's shutdown hook after draining requests.
 
-`bun run --cwd examples/services preview` serves the production build on the same port.
+`bun run --cwd packages/tss-effect-serverfn/examples/services preview` serves the production build on the same port.

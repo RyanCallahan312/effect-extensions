@@ -3,7 +3,7 @@
   "globalDependencies": [
     "tsconfig.json",
     "tsconfig.base.json",
-    "examples/playground.css"
+    "packages/tss-effect-serverfn/examples/playground.css"
   ],
   "tasks": {
     "//#lint": {

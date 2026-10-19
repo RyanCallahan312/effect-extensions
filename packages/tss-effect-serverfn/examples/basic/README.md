@@ -7,7 +7,7 @@ From the repository root:
 ```sh
 bun install
 bun run build
-bun run --cwd examples/basic dev
+bun run --cwd packages/tss-effect-serverfn/examples/basic dev
 ```
 
 Open http://localhost:3000. The initial greeting is server-rendered. Submit a name and a positive numeric string: the piped Schema converts the string into a number and checks it before the handler runs. An invalid count, including `0`, produces a safe `Invalid input` message.
@@ -24,7 +24,7 @@ Use **Composition** to compare equivalent endpoints:
 | `Effect.fn` | A named, traced function passed directly to `.handler`, with a result combinator |
 | `Do + bind + let` | Sequential Effect bindings and pure fields |
 
-See the [composition guide](../../packages/tss-effect-serverfn/docs/composition.md) for copyable snippets and when to use each operator.
+See the [composition guide](../../docs/composition.md) for copyable snippets and when to use each operator.
 
 - **Check browser utilities** composes native `createClientOnlyFn` and `createIsomorphicFn` with Effect in a browser event handler.
 - **Server redirect** uses an Effect failure containing Start's native redirect, handled by `useServerFn`.
@@ -37,4 +37,4 @@ Start reading at:
 3. [`src/greeting.functions.ts`](src/greeting.functions.ts) — raw Schema and Effect endpoint.
 4. [`src/routes/index.tsx`](src/routes/index.tsx) — SSR loader and browser calls.
 
-`bun run --cwd examples/basic preview` serves the production build on the same port.
+`bun run --cwd packages/tss-effect-serverfn/examples/basic preview` serves the production build on the same port.

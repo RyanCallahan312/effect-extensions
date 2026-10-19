@@ -2,7 +2,7 @@
 
 Handlers can return any native Effect. `Effect.gen`, `pipe`, `.pipe`, `flow`, `Effect.fn`, and do notation all use the same configured runtime, decoded input, and request Scope.
 
-Start with the [configured factory](../README.md#quick-start). Try the examples in the [basic app](https://github.com/RyanCallahan312/tss-effect-serverfn/tree/main/examples/basic): its **Composition** selector runs five equivalent server functions through real RPCs.
+Start with the [configured factory](../README.md#quick-start). Try the examples in the [basic app](https://github.com/RyanCallahan312/effect-extensions/tree/main/packages/tss-effect-serverfn/examples/basic): its **Composition** selector runs five equivalent server functions through real RPCs.
 
 ## Choose a composition style
 
@@ -136,7 +136,7 @@ Each step retains earlier fields. A later `bind` or `let` callback can use those
 
 ## Pipe service work and recover a business error
 
-The [services app](https://github.com/RyanCallahan312/tss-effect-serverfn/tree/main/examples/services) provides `Notes` through its application-owned `ManagedRuntime`. Its `notes.functions.ts` composes the service directly:
+The [services app](https://github.com/RyanCallahan312/effect-extensions/tree/main/packages/tss-effect-serverfn/examples/services) provides `Notes` through its application-owned `ManagedRuntime`. Its `notes.functions.ts` composes the service directly:
 
 ```ts
 import { Effect, flow, Schema } from "effect";

@@ -120,8 +120,8 @@ The three environment helpers return lazy Effects for composition. Use `yield*` 
 ## More
 
 - [Composition examples: pipe, flow, Effect.fn, and combinators](docs/composition.md)
-- [Runnable basic and service examples](https://github.com/RyanCallahan312/tss-effect-serverfn/tree/main/examples)
+- [Runnable basic and service examples](https://github.com/RyanCallahan312/effect-extensions/tree/main/packages/tss-effect-serverfn/examples)
 - [Application services, errors, reporting, and execution details](docs/usage.md)
-- [Workspace development](https://github.com/RyanCallahan312/tss-effect-serverfn#development)
+- [Workspace development](docs/development.md)
 
 Tested with Effect 4.0.5, React Start 1.169.2, and Vite 8.3.4. Supported peer ranges are in `package.json`.

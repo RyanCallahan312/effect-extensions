@@ -4,7 +4,7 @@ From the repository root:
 
 ```sh
 bun install
-bunx --no-install playwright install chromium
+(cd packages/tss-effect-serverfn && bunx --no-install playwright install chromium)
 bun run test:e2e
 ```
 
@@ -41,9 +41,8 @@ These browser checks complement the package tests for Scope/finalization, cancel
 ```sh
 bun run test:e2e --project=basic-dev
 bun run test:e2e --project=services-preview --headed
+cd packages/tss-effect-serverfn
 bunx --no-install playwright show-report
 ```
 
-Failures retain screenshots and traces under `test-results/`; the HTML report is in `playwright-report/`. Playwright prints the command to open each failed test's trace. Generated files are ignored by Git.
-
-The [Tests workflow](../.github/workflows/tests.yml) installs Chromium with its system dependencies, builds and typechecks the workspaces, runs package tests, and runs this suite. On failure it uploads the browser artifacts for seven days.
+Failures retain screenshots and traces under `packages/tss-effect-serverfn/test-results/`; the HTML report is in `packages/tss-effect-serverfn/playwright-report/`. Playwright prints the command to open each failed test's trace. Generated files are ignored by Git.

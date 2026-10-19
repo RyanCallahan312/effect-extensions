@@ -3,7 +3,7 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "examples/*"
+    "packages/*/examples/*"
   ],
   "type": "module",
   "scripts": {
@@ -11,9 +11,9 @@
     "dev": "turbo run dev",
     "lint": "ultracite check",
     "format": "ultracite fix",
-    "typecheck": "turbo run typecheck && tsc -p e2e/tsconfig.json",
+    "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:e2e": "turbo run build && playwright test",
+    "test:e2e": "turbo run build --filter=@example/basic --filter=@example/services && bun run --cwd packages/tss-effect-serverfn test:e2e",
     "check": "bun run lint && bun run typecheck && bun run test",
     "changeset": "changeset",
     "version-packages": "changeset version",
@@ -25,7 +25,6 @@
     "@changesets/cli": "^3.0.3",
     "@effect/tsgo": "0.53.0",
     "@oxlint/plugins": "1.88.0",
-    "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",
     "oxfmt": "^0.73.0",
     "oxlint": "1.88.0",
