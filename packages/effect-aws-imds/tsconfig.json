@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "plugins": [
+      {
+        "name": "@effect/language-service",
+        "namespaceImportPackages": ["effect", "@effect/*"],
+        "allowedUnstableApis": [
+          "effect/http/FetchHttpClient",
+          "effect/http/Headers",
+          "effect/http/HttpClient",
+          "effect/http/HttpClientError",
+          "effect/http/HttpClientRequest",
+          "effect/http/HttpClientResponse"
+        ]
+      }
+    ]
+  },
+  "include": ["src"]
+}

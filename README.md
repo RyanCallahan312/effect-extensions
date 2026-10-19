@@ -6,6 +6,7 @@ A Bun/Turborepo workspace for Effect packages and related projects.
 
 | Package | Documentation |
 | --- | --- |
+| [`@rc312/effect-aws-imds`](packages/effect-aws-imds) | [Usage and API](packages/effect-aws-imds/README.md) |
 | [`@rc312/tss-effect-serverfn`](packages/tss-effect-serverfn) | [Quick start](packages/tss-effect-serverfn/README.md), [usage](packages/tss-effect-serverfn/docs/usage.md), [examples](packages/tss-effect-serverfn/examples/README.md), and [development](packages/tss-effect-serverfn/docs/development.md) |
 
 Package-specific documentation, examples, and browser tests live inside their package directory.

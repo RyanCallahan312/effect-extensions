@@ -16,6 +16,30 @@
         "ultracite": "8.0.1",
       },
     },
+    "packages/effect-aws-imds": {
+      "name": "@rc312/effect-aws-imds",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@effect/vitest": "^4.0.5",
+        "@types/node": "^26.6.5",
+        "effect": "^4.0.5",
+        "vitest": "^5.0.4",
+      },
+      "peerDependencies": {
+        "effect": "^4.0.5",
+      },
+    },
+    "packages/effect-aws-imds/examples/instance-info": {
+      "name": "@example/imds-instance-info",
+      "dependencies": {
+        "@rc312/effect-aws-imds": "workspace:*",
+        "effect": "^4.0.5",
+      },
+      "devDependencies": {
+        "@types/node": "^26.6.5",
+        "vitest": "^5.0.4",
+      },
+    },
     "packages/tss-effect-serverfn": {
       "name": "@rc312/tss-effect-serverfn",
       "version": "0.1.0",
@@ -186,6 +210,8 @@
 
     "@example/basic": ["@example/basic@workspace:packages/tss-effect-serverfn/examples/basic"],
 
+    "@example/imds-instance-info": ["@example/imds-instance-info@workspace:packages/effect-aws-imds/examples/instance-info"],
+
     "@example/services": ["@example/services@workspace:packages/tss-effect-serverfn/examples/services"],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
@@ -301,6 +327,8 @@
     "@playwright/test": ["@playwright/test@1.64.1", "", { "dependencies": { "playwright": "1.64.1" }, "bin": { "playwright": "cli.js" } }, "sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg=="],
 
     "@pnpm/deps.graph-sequencer": ["@pnpm/deps.graph-sequencer@1100.0.1", "", {}, "sha512-pOr5+q1fLYKwFN3LAJuGZEnfXDcQ73zqgDHMtGy+K+uIoUqyY+6MeDCWFwfu+4EFuq76I5EPFofoNAI+Bmmq4A=="],
+
+    "@rc312/effect-aws-imds": ["@rc312/effect-aws-imds@workspace:packages/effect-aws-imds"],
 
     "@rc312/tss-effect-serverfn": ["@rc312/tss-effect-serverfn@workspace:packages/tss-effect-serverfn"],
 

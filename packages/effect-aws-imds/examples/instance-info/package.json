@@ -1,0 +1,20 @@
+{
+  "name": "@example/imds-instance-info",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json --tsBuildInfoFile .cache/typecheck.tsbuildinfo && tsc -p tsconfig.test.json",
+    "test": "vitest run",
+    "start": "node dist/main.js",
+    "mock": "node dist/mock-imds-server.js"
+  },
+  "dependencies": {
+    "@rc312/effect-aws-imds": "workspace:*",
+    "effect": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "vitest": "^5.0.4"
+  }
+}
