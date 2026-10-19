@@ -26,3 +26,15 @@ bun run format      # apply formatting and safe lint fixes
 Add packages under `packages/`. Example apps under `packages/*/examples/*` are private Bun workspaces. Shared tooling and TypeScript configuration remain at the root. Add a project reference to the root `tsconfig.json` for each package that uses the shared TypeScript build.
 
 See each package's documentation for its development, browser testing, and release instructions.
+
+## Codex worktrees
+
+The shared local environment is defined in `.codex/environments/environment.toml`.
+Select it when creating a Codex worktree. Its setup script runs
+`bun install --frozen-lockfile`, including the workspace's `prepare` hook, so each
+worktree gets its own dependencies and TypeScript patch. Bun and Node.js must be
+available on the host with the versions described above.
+
+The environment also provides **Dev**, **Check**, and **Build** actions for the
+workspace scripts. Commit the environment file so worktrees created from that
+commit include it.
