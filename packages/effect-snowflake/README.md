@@ -173,5 +173,3 @@ bun run lint
 ```
 
 Unit tests use real Arrow IPC and controlled native resources for precision, acquisition and reader failures, serialized work, combined cleanup causes, transaction interruption, scope retirement, and tracing redaction. The examples and E2E sources are included in typechecking. Coverage reports are written under the package's ignored `coverage/` directory; the live suite runs separately from ordinary unit tests.
-
-The lifecycle ownership helpers were adapted from the provided `effect-extensions-copy/src/waddler/snowflake.ts` reference implementation.

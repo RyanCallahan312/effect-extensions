@@ -120,7 +120,7 @@ The three environment helpers return lazy Effects for composition. Use `yield*` 
 ## More
 
 - [Composition examples: pipe, flow, Effect.fn, and combinators](docs/composition.md)
-- [Runnable basic and service examples](https://github.com/RyanCallahan312/effect-extensions/tree/main/packages/tss-effect-serverfn/examples)
+- [Runnable basic and service examples](examples)
 - [Application services, errors, reporting, and execution details](docs/usage.md)
 - [Workspace development](docs/development.md)
 

@@ -141,21 +141,6 @@ const ImdsLive = AwsImds.layerFetch.pipe(
 
 - **Token handling.** The session token is held as a `Redacted` value. `x-aws-ec2-metadata-token` is added to `Headers.CurrentRedactedNames` for metadata requests, so client spans that capture request headers record it as `<redacted>`. Neither error type keeps the underlying HTTP request or its headers.
 
-## Migrating from `effect-extensions/aws/imds`
-
-| Before | Now |
-| --- | --- |
-| `awsIdentityDocument()` | `identityDocument` |
-| `layer` | `layer`, with settings from `AwsImdsConfig` |
-| `layerWithFetchHttpClient` | `layerFetch` |
-| `AwsImdsIdentityDocumentFetchError` | `AwsImdsMetadataError` (with `path` and `status`) |
-| `AwsImdsResolutionError` | `AwsImdsError` |
-| One 100 ms timeout around all retries | A 1 second timeout on each attempt |
-| 5 retries | `retryPolicy(2)`, or any bounded `Schedule` |
-| 1 minute token TTL, token used once | 6 hour token TTL, cached and reused |
-| `AwsImds` with `identityDocument` and `clearCache` | `InstanceIdentity` for the document; `AwsImds` for uncached `get(path)` |
-| — | `getSchema`, `optional`, and a replaceable `AwsImdsToken` |
-
 ## Example and end-to-end tests
 
 [`examples/instance-info`](examples/instance-info) is a CLI that uses the built package against a strict mock IMDS. Its end-to-end tests run the CLI as a real process for the healthy, throttled, token-expiry, malformed-document, unresponsive, and unreachable cases. See its [README](examples/instance-info/README.md) to run it by hand.
