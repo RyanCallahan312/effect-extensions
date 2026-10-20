@@ -12,6 +12,7 @@
     "dist",
     "src",
     "README.md",
+    "CHANGELOG.md",
     "examples"
   ],
   "type": "module",
