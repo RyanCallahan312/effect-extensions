@@ -111,7 +111,11 @@ export interface SnowflakeClient extends SnowflakeSession {
    * Disable autocommit, run `use`, and commit its success or roll back its failure.
    * @param use Callback using the supplied session; await all work before returning.
    * @returns The callback value, preserving its error and service requirements.
-   * Defects and interruption also roll back. Failed commits attempt rollback.
+   * Defects and callback interruption also roll back. Once commit starts, its
+   * outcome and autocommit restoration finish before interruption is accepted;
+   * an interrupted caller may therefore observe an already committed transaction.
+   * Failed commits attempt rollback. Recovered cleanup defects still prevent
+   * commit and fail with operation `transaction.invalidated`.
    * Failed rollback or autocommit restoration invalidates the client, and cleanup
    * defects accompany the original failure. Captured client methods resolve the
    * active transaction session. Nested transactions fail with `transaction.nested`.
