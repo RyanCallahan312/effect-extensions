@@ -13,6 +13,7 @@ import {
   recordingTracer,
   text,
 } from "./fixtures.ts";
+import type { Route } from "./fixtures.ts";
 
 const PATH = "/latest/meta-data/instance-id";
 const TOKEN_HEADER_ATTRIBUTE = "http.request.header.x-aws-ec2-metadata-token";
@@ -103,6 +104,48 @@ describe("transport failures", () => {
       expect(count(imds.requests, "GET")).toBe(3);
       expect(error).not.toHaveProperty("status");
       expect(JSON.stringify(error)).not.toContain("token-1");
+    }).pipe(Effect.provide(imds.layer()));
+  });
+});
+
+describe("response bodies", () => {
+  for (const method of ["PUT", "GET"] as const) {
+    it.effect(`retries an interrupted ${method} response body`, () => {
+      const interrupted: Effect.Effect<Response> = Effect.sync(
+        () =>
+          new Response(
+            new ReadableStream({
+              start(controller) {
+                controller.error(new Error("connection reset during body"));
+              },
+            })
+          )
+      );
+
+      const route: Route = (_request, attempt) =>
+        attempt === 1 ? interrupted : text("complete");
+
+      const imds = fakeImds({
+        get: method === "GET" ? route : () => text("complete"),
+        put: method === "PUT" ? route : () => text("token-1"),
+      });
+
+      return Effect.gen(function* interruptedBody() {
+        expect(yield* runToCompletion(AwsImds.get(PATH))).toBe("complete");
+        expect(count(imds.requests, method)).toBe(2);
+        expect(count(imds.requests, method === "PUT" ? "GET" : "PUT")).toBe(1);
+      }).pipe(Effect.provide(imds.layer()));
+    });
+  }
+
+  it.effect("does not retry metadata schema decoding failures", () => {
+    const imds = fakeImds({ get: () => text("not JSON") });
+
+    return Effect.gen(function* invalidDocument() {
+      const error = yield* Effect.flip(AwsImds.identityDocument);
+
+      expect(error).toBeInstanceOf(AwsImds.AwsImdsMetadataError);
+      expect(count(imds.requests, "GET")).toBe(1);
     }).pipe(Effect.provide(imds.layer()));
   });
 });

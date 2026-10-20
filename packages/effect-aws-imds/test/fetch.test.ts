@@ -25,61 +25,69 @@ const decodeAddress = Schema.decodeUnknownSync(
 );
 
 // A loopback IMDS that issues "loopback-token" and serves `/ok` and `/hang`.
-const loopbackImds = Effect.acquireRelease(
-  Effect.callback<{
-    readonly endpoint: string;
-    readonly seen: SeenRequest[];
-    readonly close: Effect.Effect<undefined>;
-  }>((resume) => {
-    const seen: SeenRequest[] = [];
+const loopbackImds = (stallBody?: "PUT" | "GET") =>
+  Effect.acquireRelease(
+    Effect.callback<{
+      readonly endpoint: string;
+      readonly seen: SeenRequest[];
+      readonly close: Effect.Effect<undefined>;
+    }>((resume) => {
+      const seen: SeenRequest[] = [];
 
-    const server = createServer(
-      (request: IncomingMessage, response: ServerResponse) => {
-        seen.push({
-          method: request.method ?? "",
-          token: header(request, "x-aws-ec2-metadata-token"),
-          ttl: header(request, "x-aws-ec2-metadata-token-ttl-seconds"),
-          url: request.url ?? "",
-        });
+      const server = createServer(
+        (request: IncomingMessage, response: ServerResponse) => {
+          seen.push({
+            method: request.method ?? "",
+            token: header(request, "x-aws-ec2-metadata-token"),
+            ttl: header(request, "x-aws-ec2-metadata-token-ttl-seconds"),
+            url: request.url ?? "",
+          });
 
-        if (request.method === "PUT") {
-          response.end("loopback-token");
+          if (request.method === stallBody) {
+            response.writeHead(200, { "content-type": "text/plain" });
+            response.flushHeaders();
 
-          return;
+            return;
+          }
+
+          if (request.method === "PUT") {
+            response.end("loopback-token");
+
+            return;
+          }
+
+          if (request.url === "/ok") {
+            response.end("served over fetch");
+
+            return;
+          }
+
+          if (request.url === "/drop") {
+            request.socket.destroy();
+          }
         }
-
-        if (request.url === "/ok") {
-          response.end("served over fetch");
-
-          return;
-        }
-
-        if (request.url === "/drop") {
-          request.socket.destroy();
-        }
-      }
-    );
-
-    server.listen(0, "127.0.0.1", () => {
-      const { port } = decodeAddress(server.address());
-
-      resume(
-        Effect.succeed({
-          close: Effect.callback<undefined>((closed) => {
-            server.closeAllConnections();
-            server.close(() => closed(Effect.undefined));
-          }),
-          endpoint: `http://127.0.0.1:${port}`,
-          seen,
-        })
       );
-    });
 
-    // Interrupted before listening: release the socket instead of leaking it.
-    return Effect.sync(() => server.close());
-  }),
-  (imds) => imds.close
-);
+      server.listen(0, "127.0.0.1", () => {
+        const { port } = decodeAddress(server.address());
+
+        resume(
+          Effect.succeed({
+            close: Effect.callback<undefined>((closed) => {
+              server.closeAllConnections();
+              server.close(() => closed(Effect.undefined));
+            }),
+            endpoint: `http://127.0.0.1:${port}`,
+            seen,
+          })
+        );
+      });
+
+      // Interrupted before listening: release the socket instead of leaking it.
+      return Effect.sync(() => server.close());
+    }),
+    (imds) => imds.close
+  );
 
 const fetchLayer = (options: AwsImds.AwsImdsOptions) =>
   AwsImds.layerFetch.pipe(Layer.provide(AwsImds.AwsImdsConfig.layer(options)));
@@ -87,7 +95,7 @@ const fetchLayer = (options: AwsImds.AwsImdsOptions) =>
 describe("AwsImds over FetchHttpClient", () => {
   it.live("performs the IMDSv2 handshake against a real HTTP server", () =>
     Effect.gen(function* handshake() {
-      const imds = yield* loopbackImds;
+      const imds = yield* loopbackImds();
 
       const body = yield* AwsImds.get("/ok").pipe(
         Effect.provide(
@@ -110,7 +118,7 @@ describe("AwsImds over FetchHttpClient", () => {
 
   it.live("fails with a sanitized typed error when a request times out", () =>
     Effect.gen(function* timeout() {
-      const imds = yield* loopbackImds;
+      const imds = yield* loopbackImds();
 
       const error = yield* AwsImds.get("/hang").pipe(
         Effect.flip,
@@ -131,7 +139,7 @@ describe("AwsImds over FetchHttpClient", () => {
 
   it.live("keeps the session token out of transport errors", () =>
     Effect.gen(function* transport() {
-      const imds = yield* loopbackImds;
+      const imds = yield* loopbackImds();
 
       const error = yield* AwsImds.get("/drop").pipe(
         Effect.flip,
@@ -149,4 +157,38 @@ describe("AwsImds over FetchHttpClient", () => {
       );
     }).pipe(Effect.scoped)
   );
+
+  for (const method of ["PUT", "GET"] as const) {
+    it.live(`bounds retries when a ${method} body stalls after headers`, () =>
+      Effect.gen(function* stalledBody() {
+        const imds = yield* loopbackImds(method);
+
+        const error = yield* AwsImds.get("/ok").pipe(
+          Effect.flip,
+          Effect.provide(
+            fetchLayer({
+              attemptTimeout: "50 millis",
+              endpoint: imds.endpoint,
+              retrySchedule: AwsImds.retryPolicy(1),
+            })
+          ),
+          // Also bounds a regression where the attempt timeout is bypassed.
+          Effect.timeout("2 seconds")
+        );
+
+        expect(error).toBeInstanceOf(
+          method === "PUT"
+            ? AwsImds.AwsImdsTokenError
+            : AwsImds.AwsImdsMetadataError
+        );
+        expect(error).not.toHaveProperty("status");
+        expect(
+          imds.seen.filter((request) => request.method === method)
+        ).toHaveLength(2);
+        expect(
+          imds.seen.filter((request) => request.method !== method)
+        ).toHaveLength(method === "PUT" ? 0 : 1);
+      }).pipe(Effect.scoped)
+    );
+  }
 });

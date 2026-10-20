@@ -20,8 +20,8 @@ const redactTokenHeader = Effect.updateService(
 
 /**
  * IMDS transport policy for any `HttpClient`: the endpoint as base URL, a
- * timeout on each attempt, non-2xx statuses as errors, and transient retries
- * on `settings.retrySchedule`.
+ * timeout on each attempt including its text body, non-2xx statuses as errors,
+ * and transient retries on `settings.retrySchedule`.
  *
  * @since 0.1.0
  */
@@ -30,9 +30,19 @@ const imdsTransport =
   <E, R>(client: HttpClient.HttpClient.With<E, R>) =>
     client.pipe(
       HttpClient.mapRequest(HttpClientRequest.prependUrl(settings.endpoint)),
-      HttpClient.transformResponse(Effect.timeout(settings.attemptTimeout)),
       HttpClient.filterStatusOk,
-      HttpClient.retryTransient({ schedule: settings.retrySchedule })
+      // HTTP responses memoize their text, so callers can read it again after
+      // the complete download has succeeded within the attempt's deadline.
+      HttpClient.tap((response) => response.text),
+      HttpClient.transformResponse(Effect.timeout(settings.attemptTimeout)),
+      HttpClient.retryTransient({
+        schedule: settings.retrySchedule,
+        // Reading the text body can fail after headers have already arrived.
+        // Schema/JSON decoding happens outside this transport policy.
+        while: (error) =>
+          HttpClientError.isHttpClientError(error) &&
+          error.reason instanceof HttpClientError.DecodeError,
+      })
     );
 
 const isUnauthorized = <E>(error: E) =>

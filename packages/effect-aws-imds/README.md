@@ -62,7 +62,7 @@ const Reads = AwsImds.AwsImds.layer.pipe(Layer.provide(StaticToken));
 
 The HTTP policy is exposed as two `HttpClient` combinators, so you can build your own client around them:
 
-- `imdsTransport(settings)` applies the endpoint, the per-attempt timeout, non-2xx statuses as errors, and `retrySchedule`.
+- `imdsTransport(settings)` applies the endpoint, buffers successful text bodies within the per-attempt timeout, treats non-2xx statuses as errors, and applies `retrySchedule`, including retries for interrupted body downloads.
 - `withSessionToken(token)` resolves a session token from an `AwsImdsToken` before each request, outside that request's timeout and retries, and refreshes it once after a `401`. Apply it after `imdsTransport`.
 
 ```ts
@@ -113,7 +113,7 @@ const ImdsLive = AwsImds.layerFetch.pipe(
 | --- | --- | --- |
 | `endpoint` | `http://169.254.169.254` | Use `http://[fd00:ec2::254]` on IPv6-only instances. |
 | `tokenTtl` | `6 hours` | Clamped to 1 second through 6 hours. |
-| `attemptTimeout` | `1 second` | Applies to each HTTP attempt. Token requests run before a read, outside its timeout. |
+| `attemptTimeout` | `1 second` | Applies to each HTTP attempt, including reading its response body. Token requests run before a read, outside its timeout. |
 | `retrySchedule` | `retryPolicy(2)` | A bounded `Schedule` (for example with `Schedule.upTo`), applied to timeouts, transport errors, and transient statuses (408, 429, 500, 502, 503, 504). It is the only bound on retries: an unbounded schedule retries forever when IMDS is unreachable. |
 
 `AwsImdsConfig.layer(options)` takes the same fields as plain values.
