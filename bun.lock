@@ -18,7 +18,7 @@
     },
     "packages/effect-aws-imds": {
       "name": "@rc312/effect-aws-imds",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "devDependencies": {
         "@effect/vitest": "^4.0.5",
         "@types/node": "^26.6.5",

@@ -1,6 +1,6 @@
 {
   "name": "@rc312/effect-aws-imds",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Effect-native client for the AWS EC2 Instance Metadata Service (IMDSv2).",
   "license": "MIT",
   "repository": {
