@@ -2,7 +2,14 @@
   "$schema": "./node_modules/@effect/tsgo/schema.json",
   "files": [],
   "references": [
-    { "path": "./packages/effect-aws-imds" },
-    { "path": "./packages/tss-effect-serverfn" }
+    {
+      "path": "./packages/effect-aws-imds"
+    },
+    {
+      "path": "./packages/effect-snowflake"
+    },
+    {
+      "path": "./packages/tss-effect-serverfn"
+    }
   ]
 }

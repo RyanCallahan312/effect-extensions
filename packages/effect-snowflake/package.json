@@ -1,0 +1,60 @@
+{
+  "name": "@rc312/effect-snowflake",
+  "version": "0.1.0",
+  "description": "Scoped Effect 4 Snowflake client with Apache Arrow ADBC queries, streams, and transactions.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RyanCallahan312/effect-extensions.git",
+    "directory": "packages/effect-snowflake"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "examples"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json",
+    "./adbc-driver": "./dist/adbc-driver.js"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsc -b tsconfig.json",
+    "dev": "tsc -b tsconfig.json --watch",
+    "typecheck": "bun run build && tsc --noEmit -p tsconfig.json --tsBuildInfoFile .cache/typecheck.tsbuildinfo && tsc -p tsconfig.test.json && tsc -p tsconfig.examples.json --noEmit",
+    "test": "bun run build && vitest run && bun run test:cli",
+    "prepack": "bun run build",
+    "test:coverage": "bun run build && vitest run --coverage",
+    "build:examples": "bun run build && tsc -p tsconfig.examples.json",
+    "example:query": "bun run build:examples && node --env-file-if-exists=.env .cache/examples/examples/query.js",
+    "example:stream": "bun run build:examples && node --env-file-if-exists=.env .cache/examples/examples/stream.js",
+    "example:transaction": "bun run build:examples && node --env-file-if-exists=.env .cache/examples/examples/transaction.js",
+    "example:check": "bun run build:examples && node --env-file-if-exists=.env .cache/examples/examples/check.js",
+    "test:e2e": "bun run build:examples && node --env-file-if-exists=.env --test .cache/examples/e2e/*.test.js",
+    "test:cli": "bun run build:examples && node --test test/*.test.mjs",
+    "example:composition": "bun run build:examples && node --env-file-if-exists=.env .cache/examples/examples/composition.js"
+  },
+  "dependencies": {
+    "@apache-arrow/adbc-driver-manager": "~0.24.0"
+  },
+  "devDependencies": {
+    "@effect/vitest": "^4.0.5",
+    "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "5.0.4",
+    "vitest": "^5.0.4"
+  },
+  "peerDependencies": {
+    "apache-arrow": "^21.1.0",
+    "effect": "^4.0.5"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
