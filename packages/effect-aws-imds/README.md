@@ -13,7 +13,10 @@ import * as AwsImds from "@rc312/effect-aws-imds";
 import { Effect } from "effect";
 
 const program = Effect.gen(function* () {
+  // Yield the Effect to obtain the decoded, memoized document.
   const document = yield* AwsImds.identityDocument;
+  // document.instanceType is already available without another request.
+  // This extra request demonstrates uncached reads with get(path).
   const instanceType = yield* AwsImds.get("/latest/meta-data/instance-type");
 
   return {

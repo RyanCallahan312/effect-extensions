@@ -32,7 +32,10 @@ const instanceInfo = Effect.gen(function* instanceInfo() {
   const [document, instanceType, availabilityZone, localIpv4, spotAction] =
     yield* Effect.all(
       [
+        // Running this Effect returns the decoded, memoized document.
         AwsImds.identityDocument,
+        // These extra requests demonstrate uncached reads with get(path).
+        // The document also has instanceType, availabilityZone, and privateIp.
         AwsImds.get("/latest/meta-data/instance-type"),
         AwsImds.get("/latest/meta-data/placement/availability-zone"),
         AwsImds.get("/latest/meta-data/local-ipv4"),
