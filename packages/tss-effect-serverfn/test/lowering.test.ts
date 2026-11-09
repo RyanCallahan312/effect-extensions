@@ -1,14 +1,28 @@
-import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { Predicate } from "effect";
-import { describe, expect, it } from "vitest";
+import { createServer, normalizePath } from "vite";
+import type { ViteDevServer } from "vite";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { effectServerFns } from "../src/vite.ts";
 
-const id = fileURLToPath(
-  new URL("fixtures/compiler-gate/virtual.ts", import.meta.url)
+const id = normalizePath(
+  fileURLToPath(new URL("fixtures/compiler-gate/virtual.ts", import.meta.url))
 );
+
+let server: ViteDevServer;
+
+beforeAll(async () => {
+  server = await createServer({
+    configFile: false,
+    server: { middlewareMode: true },
+  });
+});
+
+afterAll(async () => {
+  await server.close();
+});
 
 const imports =
   'import { createEffectServerFn as base } from "@rc312/tss-effect-serverfn";';
@@ -24,11 +38,7 @@ const lower = (code: string) => {
   // SAFETY: This transform uses only resolve from Vite's context; full builds exercise Vite itself.
   const context = {
     resolve: (source: string, importer: string) =>
-      Promise.resolve({
-        id: source.startsWith(".")
-          ? path.resolve(path.dirname(importer), source)
-          : fileURLToPath(import.meta.resolve(source)),
-      }),
+      server.environments.ssr.pluginContainer.resolveId(source, importer),
   } as ThisParameterType<typeof transform>;
 
   return transform.call(context, code, id);

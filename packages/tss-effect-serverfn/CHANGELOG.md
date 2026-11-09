@@ -1,5 +1,13 @@
 # @rc312/tss-effect-serverfn
 
+## 0.2.0
+
+### Minor Changes
+
+- Upgrade Effect support to 4.1.2 and require Node.js 22.19 or newer to match Effect's runtime requirements.
+
+  Effect 4.1 promotes typed failures to defects when combined with cleanup defects.
+
 ## 0.1.0
 
 ### Minor Changes

@@ -14,7 +14,7 @@ Package-specific documentation, examples, and browser tests live inside their pa
 
 ## Workspace development
 
-Use Bun 1.3.13 and Node.js 22.12 or newer.
+Use Bun 1.3.13 and Node.js 22.19 or newer.
 
 ```sh
 bun install

@@ -15,7 +15,7 @@ cp packages/effect-snowflake/examples/.env.example packages/effect-snowflake/.en
 
 Edit `packages/effect-snowflake/.env` for a development account, warehouse, database, and schema. The template uses JWT authentication and a private-key file path. For inline keys, remove `SNOWFLAKE_PRIVATE_KEY_PATH` and set `SNOWFLAKE_PRIVATE_KEY` to a PKCS#8 PEM. `SNOWFLAKE_PRIVATE_KEY_PASS` supplies an encrypted inline key's passphrase. For password authentication, set `SNOWFLAKE_AUTHENTICATOR=auth_snowflake` and `SNOWFLAKE_PASSWORD`; for OAuth use `auth_oauth` and `SNOWFLAKE_TOKEN`.
 
-The examples need Node.js 22.12+ and Bun for workspace build scripts. The Node entrypoints load the package-local `.env` using `--env-file-if-exists`; exported environment variables take precedence. Real `.env` files are ignored by Git. Do not commit credentials. Secrets are loaded through `Config.Redacted`, and the configuration check never prints their values.
+The examples need Node.js 22.19+ and Bun for workspace build scripts. The Node entrypoints load the package-local `.env` using `--env-file-if-exists`; exported environment variables take precedence. Real `.env` files are ignored by Git. Do not commit credentials. Secrets are loaded through `Config.Redacted`, and the configuration check never prints their values.
 
 If manifest discovery is unavailable, set `SNOWFLAKE_ADBC_DRIVER` to the absolute path of an installed driver library or manifest. The shared configuration sets native login and network timeouts to 30 seconds and request retries to 60 seconds. These bound individual native operations; they are not an overall scenario deadline.
 

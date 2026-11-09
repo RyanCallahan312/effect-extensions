@@ -1,7 +1,7 @@
 # Services, Layers, and Modules
 
 Use this for capability seams, service tags, layer implementations, runtime
-wiring, and reusable Effect operations. Target installed Effect 4.0.5; verify
+wiring, and reusable Effect operations. Target installed Effect 4.1.2; verify
 unfamiliar APIs in the installed Context and Layer sources.
 
 ## Define a Domain-Named Service

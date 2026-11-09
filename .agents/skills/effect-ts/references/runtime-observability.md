@@ -21,7 +21,7 @@ telemetry. Effects run at boundaries, never from domain logic or services.
   its scoped resources must be shared; dispose the `ManagedRuntime` that owns
   them.
 - Inside Effect operations use `Config`, `Clock` / `DateTime`, `Random`, the
-  platform `Crypto` service, and `HttpClient`, not environment, clock, timer,
+  `SecureRandom` / `Digest` services from `effect/crypto`, and `HttpClient`, not environment, clock, timer,
   UUID, randomness, or fetch globals.
 - Name useful Effect tracing boundaries with `Effect.fn("Domain.operation")`
   and stream tracing boundaries with `Stream.withSpan("Domain.stream")`.

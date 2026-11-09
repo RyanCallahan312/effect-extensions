@@ -91,5 +91,5 @@ retry bounds and idempotency; resource disposal; and virtual-time transitions.
 Schema tests decode unknown input and test encoding, not only trusted `.make`.
 
 Use tests under `packages/tss-effect-serverfn/test/` for local boundary and
-runner conventions. `@effect/vitest@4.0.5` is installed; its peer runner is
+runner conventions. `@effect/vitest@4.1.2` is installed; its peer runner is
 Vitest 5, not a beta-era Vitest version.

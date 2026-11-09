@@ -2,7 +2,7 @@
 
 Read this only for work that must survive suspension or process restart.
 Use `effect/workflow`; verify every constructor, Layer, and
-storage requirement against installed 4.0.5 source.
+storage requirement against installed 4.1.2 source.
 
 ## Choose
 

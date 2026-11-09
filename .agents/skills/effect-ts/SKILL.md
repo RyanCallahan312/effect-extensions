@@ -1,6 +1,6 @@
 ---
 name: effect-ts
-description: Write and review Effect 4 code using Schema, Effect, Context.Service, Layer, Config, Schedule, Cache, Stream, HTTP, SQL, workflows, clusters, testing, and runtime boundaries. Use for Effect-native TypeScript and TanStack Start integration in this repository. Targets installed effect@4.0.5.
+description: Write and review Effect 4 code using Schema, Effect, Context.Service, Layer, Config, Schedule, Cache, Stream, HTTP, SQL, workflows, clusters, testing, and runtime boundaries. Use for Effect-native TypeScript and TanStack Start integration in this repository. Targets installed effect@4.1.2.
 ---
 
 # Effect v4
@@ -21,8 +21,8 @@ Before guessing about an unfamiliar or unstable API, read in this order:
    `ai-docs/src/` examples.
 4. Source and declarations in that installed package (`src/` and `dist/`).
 
-The lockfile and installed package currently resolve `effect@4.0.5`; the peer
-range is `^4.0.5`, not an exact pin. Recheck both before changing version-sensitive
+The lockfile and installed package currently resolve `effect@4.1.2`; the peer
+range is `^4.1.2`, not an exact pin. Recheck both before changing version-sensitive
 code. Prefer installed source over public docs or upstream main. Do not reuse
 beta APIs or assume optional `@effect/*` integrations are installed.
 
@@ -109,8 +109,8 @@ change crosses concerns.
   `Clock` / `DateTime` instead of global time, and Effect sleep/delay instead of
   global timers.
 - Use `Random` only for non-security-sensitive randomness. Use the
-  platform-provided `Crypto` service for secure bytes, UUIDs, digests, and
-  tokens.
+  `SecureRandom` service from `effect/crypto` for secure bytes, UUIDs, and
+  tokens; use its `Digest` service for digests.
 - Prefer adapting foreign Promises with
   `Effect.tryPromise`, including its `AbortSignal` when supported.
 - Yield Effect-native Drizzle builders directly. Do not wrap them in Promise

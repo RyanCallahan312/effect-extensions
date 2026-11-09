@@ -1,7 +1,7 @@
 # Advanced Schema
 
 Use this for codecs, recursion, variants, serialized contracts, or derivation.
-Target installed Effect 4.0.5. Verify unfamiliar APIs in
+Target installed Effect 4.1.2. Verify unfamiliar APIs in
 `packages/tss-effect-serverfn/node_modules/effect/src/Schema.ts` and
 `packages/tss-effect-serverfn/node_modules/effect/src/SchemaTransformation.ts`.
 

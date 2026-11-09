@@ -2,7 +2,7 @@
 
 Use this when reading environment settings, selecting a provider, or building a
 config-backed layer. Read configuration through `Config` and `ConfigProvider`,
-never `process.env` inside Effect operations. Target installed Effect 4.0.5; verify
+never `process.env` inside Effect operations. Target installed Effect 4.1.2; verify
 unfamiliar APIs in the installed Config and ConfigProvider sources.
 
 ## Define Typed Recipes

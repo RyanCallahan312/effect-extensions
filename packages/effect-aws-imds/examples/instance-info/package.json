@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@rc312/effect-aws-imds": "workspace:*",
-    "effect": "^4.0.5"
+    "effect": "^4.1.2"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",

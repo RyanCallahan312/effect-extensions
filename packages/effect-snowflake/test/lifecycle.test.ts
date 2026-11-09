@@ -272,8 +272,10 @@ describe("Snowflake resource failures", () => {
               .filter(Cause.isDieReason)
               .map((reason) => reason.defect);
 
-            expect(failures).toEqual(["transaction.commit"]);
+            // Effect 4.1 elects typed failures to defects when a finalizer dies.
+            expect(failures).toEqual([]);
             expect(defects).toEqual([
+              expect.objectContaining({ operation: "transaction.commit" }),
               expect.objectContaining({ operation: "transaction.rollback" }),
             ]);
             expect(f.events).not.toContain("autocommit:true");

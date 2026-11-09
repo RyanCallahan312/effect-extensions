@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { extname, join, relative, resolve } from "node:path";
+import { extname, join, relative, resolve, sep } from "node:path";
 import * as ts from "typescript/unstable/ast";
 
 const defaultSkillRoot = resolve(import.meta.dir, "..");
@@ -45,7 +45,9 @@ const apiSources = {
   Config: "Config.ts",
   ConfigProvider: "ConfigProvider.ts",
   Context: "Context.ts",
-  Crypto: "Crypto.ts",
+  SecureRandom: "crypto/SecureRandom.ts",
+  Digest: "crypto/Digest.ts",
+  WebCrypto: "crypto/WebCrypto.ts",
   Data: "Data.ts",
   DateTime: "DateTime.ts",
   Deferred: "Deferred.ts",
@@ -241,7 +243,7 @@ for (const file of contentFiles(skillRoot)) {
   // Validator implementations are not Effect examples. Scan the Markdown
   // examples and any standalone examples outside scripts/ instead.
   if (
-    relative(skillRoot, file).startsWith("scripts/") ||
+    relative(skillRoot, file).startsWith(`scripts${sep}`) ||
     file.endsWith(".test.ts")
   ) {
     continue;

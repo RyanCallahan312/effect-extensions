@@ -1,7 +1,7 @@
 # Specialized Protocol Modules
 
 Read this only for Effect AI, RPC, HTTP API, or OpenAPI. This is a retrieval
-router, not an API reference: verify each module against installed 4.0.5 source.
+router, not an API reference: verify each module against installed 4.1.2 source.
 
 ## Choose
 

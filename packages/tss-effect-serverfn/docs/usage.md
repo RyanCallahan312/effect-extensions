@@ -204,7 +204,7 @@ Optional fields returned by `resolve`:
 | `reportFailure(report)` | Effect-valued replacement for the default reporting action |
 | `reportTimeout` | Native `Duration.Input`; defaults to `"5 seconds"` for the override |
 
-An override is awaited after request-scope cleanup, with application services and request metadata. Its faults/timeouts cannot replace the business rejection. Use `Effect.tryPromise` and its signal for foreign reporters. Compose `ErrorReporter.report` explicitly if the override should also invoke native reporters. ErrorReporter and the HTTP request APIs are unstable in Effect 4.0.5.
+An override is awaited after request-scope cleanup, with application services and request metadata. Its faults/timeouts cannot replace the business rejection. Use `Effect.tryPromise` and its signal for foreign reporters. Compose `ErrorReporter.report` explicitly if the override should also invoke native reporters. ErrorReporter and the HTTP request APIs are unstable in Effect 4.1.2.
 
 For outer framework reporting, `@rc312/tss-effect-serverfn/server` exports:
 

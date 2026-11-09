@@ -5,13 +5,13 @@ below from the repository root, not from this reference directory.
 
 ## Verify the Target
 
-- Installed and locked: `effect@4.0.5`, `@effect/vitest@4.0.5`.
-- Declared Effect peer range: `^4.0.5` in
+- Installed and locked: `effect@4.1.2`, `@effect/vitest@4.1.2`.
+- Declared Effect peer range: `^4.1.2` in
   `packages/tss-effect-serverfn/package.json`. Do not describe it as an exact pin.
 - Source root: `packages/tss-effect-serverfn/node_modules/effect/src/`.
 - Documentation index: installed `effect/AGENTS.md`; examples: `effect/ai-docs/src/`.
 - Public exports: installed `effect/package.json`; declarations: `effect/dist/`.
-- Toolchain: TypeScript 7.0.2 and `@effect/tsgo@0.53.0`; run the installed `tsc`.
+- Toolchain: TypeScript 7.0.2 and `@effect/tsgo@0.67.5`; run the installed `tsc`.
   The root `typescript` import no longer provides the TypeScript 5 compiler API.
 
 ```sh
@@ -25,7 +25,7 @@ as if it described the installed release.
 
 ## Replace Beta-Era Names
 
-| Earlier skill guidance | Installed 4.0.5 guidance |
+| Earlier skill guidance | Installed 4.1.2 guidance |
 | --- | --- |
 | Schema.TaggedErrorClass | `Schema.TaggedError<Self>()("Tag", fields)` |
 | SchemaTransformation.transformOrFail | `SchemaTransformation.transformEffect` |

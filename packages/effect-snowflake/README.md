@@ -8,7 +8,7 @@ An Effect 4 client for Snowflake through Apache Arrow ADBC. Queries return Arrow
 bun add @rc312/effect-snowflake effect apache-arrow@^21.1.0
 ```
 
-Use Node.js 22.12 or newer. This is a server-only package with a native dependency. The package includes the JavaScript ADBC driver manager; install the Snowflake shared-library driver separately:
+Use Node.js 22.19 or newer. This is a server-only package with a native dependency. The package includes the JavaScript ADBC driver manager; install the Snowflake shared-library driver separately:
 
 ```sh
 npm install -g @columnar-tech/dbc
@@ -128,7 +128,7 @@ const insert = db.transaction((tx) =>
 
 Transactions reserve the connection, disable autocommit, and serialize work on the supplied session. Use `tx` inside the callback and await its work. Returning from the callback closes its child scope and expires the session before commit. Typed failures, defects, and interruption trigger rollback. Failed commits also attempt rollback. Successful completion or rollback restores autocommit.
 
-Failed reader/statement cleanup, rollback, or autocommit restoration invalidates the client; no further operation is accepted. Recovering a cleanup defect within the callback still prevents commit: the transaction fails with operation `transaction.invalidated` and attempts rollback. Autocommit is never re-enabled after a failed rollback, because doing so could commit pending changes. Cleanup failures are preserved as defects alongside the original failure. Acquire a new client after invalidation.
+Failed reader/statement cleanup, rollback, or autocommit restoration invalidates the client; no further operation is accepted. Recovering a cleanup defect within the callback still prevents commit: the transaction fails with operation `transaction.invalidated` and attempts rollback. Autocommit is never re-enabled after a failed rollback, because doing so could commit pending changes. Cleanup failures are preserved as defects alongside the original failure. In Effect 4.1, a cleanup defect also promotes the original typed failure to a defect in the combined Cause. Acquire a new client after invalidation.
 
 Only the callback is interruptible. Once commit starts, the adapter finishes commit and autocommit restoration before releasing the connection. Interruption during a successful commit does not trigger a subsequent rollback; the caller may still observe interruption after the commit completes.
 

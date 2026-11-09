@@ -1,6 +1,6 @@
 {
   "name": "@rc312/effect-snowflake",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Scoped Effect 4 Snowflake client with Apache Arrow ADBC queries, streams, and transactions.",
   "license": "MIT",
   "repository": {
@@ -46,16 +46,16 @@
     "@apache-arrow/adbc-driver-manager": "~0.24.0"
   },
   "devDependencies": {
-    "@effect/vitest": "^4.0.5",
+    "@effect/vitest": "^4.1.2",
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "5.0.4",
     "vitest": "^5.0.4"
   },
   "peerDependencies": {
     "apache-arrow": "^21.1.0",
-    "effect": "^4.0.5"
+    "effect": "^4.1.2"
   },
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.19.0"
   }
 }

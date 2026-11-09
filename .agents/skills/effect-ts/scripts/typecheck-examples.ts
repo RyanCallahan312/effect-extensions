@@ -18,6 +18,10 @@ const defaultSkillRoot = resolve(import.meta.dir, "..");
 const skillRoot = resolve(Bun.env.EFFECT_SKILL_ROOT ?? defaultSkillRoot);
 const repoRoot = resolve(defaultSkillRoot, "../../..");
 const effectModules = join(repoRoot, "packages/tss-effect-serverfn/node_modules");
+const compiler = join(
+  repoRoot,
+  process.platform === "win32" ? "node_modules/.bin/tsc.exe" : "node_modules/.bin/tsc"
+);
 const fence = /^\s*(`{3,}|~{3,})(ts|tsx|typescript|mts)(?:\s+.*)?$/i;
 const suppression = /@ts-(?:ignore|nocheck|expect-error)|@effect-diagnostics/;
 
@@ -160,13 +164,17 @@ try {
     );
   const sentinelConfig = join(directory, "tsconfig-sentinel.json");
   writeTsconfig(sentinelConfig, ["diagnostics-sentinel.ts"]);
-  symlinkSync(effectModules, join(directory, "node_modules"), "dir");
+  symlinkSync(
+    effectModules,
+    join(directory, "node_modules"),
+    process.platform === "win32" ? "junction" : "dir"
+  );
 
   writeFileSync(
     join(directory, "diagnostics-sentinel.ts"),
     'import { Effect } from "effect"\nEffect.succeed(1)\n'
   );
-  const sentinel = await $`${join(repoRoot, "node_modules/.bin/tsc")} --project ${sentinelConfig}`
+  const sentinel = await $`${compiler} --project ${sentinelConfig}`
     .cwd(repoRoot)
     .nothrow()
     .quiet();
@@ -186,7 +194,7 @@ try {
       const source = `example-${index}${example.extension}`;
       const config = join(directory, `tsconfig-${index}.json`);
       writeTsconfig(config, [source]);
-      return await $`${join(repoRoot, "node_modules/.bin/tsc")} --project ${config}`
+      return await $`${compiler} --project ${config}`
         .cwd(repoRoot)
         .nothrow();
     })

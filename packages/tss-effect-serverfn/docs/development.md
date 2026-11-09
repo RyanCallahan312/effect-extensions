@@ -4,7 +4,7 @@ Run the following commands from the repository root unless noted otherwise.
 
 ## Development
 
-Use Bun 1.3.13 and Node.js 22.12 or newer.
+Use Bun 1.3.13 and Node.js 22.19 or newer.
 
 ```sh
 bun install

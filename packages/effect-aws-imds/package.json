@@ -1,6 +1,6 @@
 {
   "name": "@rc312/effect-aws-imds",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Effect-native client for the AWS EC2 Instance Metadata Service (IMDSv2).",
   "license": "MIT",
   "repository": {
@@ -30,15 +30,15 @@
     "prepack": "bun run build"
   },
   "devDependencies": {
-    "@effect/vitest": "^4.0.5",
+    "@effect/vitest": "^4.1.2",
     "@types/node": "^26.6.5",
-    "effect": "^4.0.5",
+    "effect": "^4.1.2",
     "vitest": "^5.0.4"
   },
   "peerDependencies": {
-    "effect": "^4.0.5"
+    "effect": "^4.1.2"
   },
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.19.0"
   }
 }

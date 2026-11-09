@@ -93,7 +93,7 @@ describe("native Effect endpoint", () => {
       emptyFactory().handler(() =>
         // @ts-expect-error Notes is not provided by this runtime.
         // @effect-diagnostics-next-line missingEffectContext:off
-        Notes.pipe(Effect.map(() => "value"))
+        Notes.pipe(Effect.as("value"))
       );
 
     const invalidOutput = () =>

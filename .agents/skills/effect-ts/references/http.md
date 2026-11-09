@@ -1,7 +1,7 @@
 # HTTP Clients
 
 Read this only for outgoing HTTP from Effect code. Use `effect/http`; verify
-imports and Layer requirements against installed 4.0.5 source.
+imports and Layer requirements against installed 4.1.2 source.
 
 ## Choose
 

@@ -3,7 +3,7 @@
 An **Effect-native client for the AWS EC2 Instance Metadata Service** (IMDSv2). It has no runtime dependencies besides its `effect` peer.
 
 ```sh
-bun add @rc312/effect-aws-imds 'effect@^4.0.5'
+bun add @rc312/effect-aws-imds 'effect@^4.1.2'
 ```
 
 ## Usage

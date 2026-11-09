@@ -7,7 +7,7 @@ Write TanStack Start server functions with **Effect Schemas and Effect handlers*
 In an existing **TanStack React Start** app using **Effect 4**:
 
 ```sh
-bun add @rc312/tss-effect-serverfn 'effect@^4.0.5'
+bun add @rc312/tss-effect-serverfn 'effect@^4.1.2'
 ```
 
 ### 1. Register the Vite plugin
@@ -124,4 +124,4 @@ The three environment helpers return lazy Effects for composition. Use `yield*` 
 - [Application services, errors, reporting, and execution details](docs/usage.md)
 - [Workspace development](docs/development.md)
 
-Tested with Effect 4.0.5, React Start 1.169.2, and Vite 8.3.4. Supported peer ranges are in `package.json`.
+Tested with Effect 4.1.2, React Start 1.169.2, and Vite 8.3.4. Supported peer ranges are in `package.json`.

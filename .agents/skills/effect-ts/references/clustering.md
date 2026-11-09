@@ -1,7 +1,7 @@
 # Clustering and Entities
 
 Read this only for distributed entities, sharding, or cluster-backed workflows.
-Use `effect/cluster`; inspect installed 4.0.5 source before implementation.
+Use `effect/cluster`; inspect installed 4.1.2 source before implementation.
 
 ## Choose
 

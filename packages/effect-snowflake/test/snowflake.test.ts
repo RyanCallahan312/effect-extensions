@@ -357,7 +357,17 @@ describe("Snowflake ADBC client", () => {
 
               if (Exit.isFailure(exit)) {
                 expect(Cause.hasDies(exit.cause)).toBe(true);
-                expect(Cause.hasFails(exit.cause)).toBe(true);
+                expect(Cause.hasFails(exit.cause)).toBe(false);
+                expect(
+                  exit.cause.reasons
+                    .filter(Cause.isDieReason)
+                    .map((reason) => reason.defect)
+                ).toEqual([
+                  "abort",
+                  expect.objectContaining({
+                    operation: "transaction.rollback",
+                  }),
+                ]);
               }
 
               expect(f.events).not.toContain("autocommit:true");
