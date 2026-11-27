@@ -1,5 +1,11 @@
 # @rc312/tss-effect-serverfn
 
+## 0.2.1
+
+### Patch Changes
+
+- 56e4c81: Raise the minimum supported Effect version to 4.1.7 and update Effect's Vitest integration to 4.1.7.
+
 ## 0.2.0
 
 ### Minor Changes

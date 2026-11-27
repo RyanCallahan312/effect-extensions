@@ -18,7 +18,7 @@
     },
     "packages/effect-aws-imds": {
       "name": "@rc312/effect-aws-imds",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "devDependencies": {
         "@effect/vitest": "^4.1.7",
         "@types/node": "^26.6.5",
@@ -42,7 +42,7 @@
     },
     "packages/effect-snowflake": {
       "name": "@rc312/effect-snowflake",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "dependencies": {
         "@apache-arrow/adbc-driver-manager": "~0.24.0",
       },
@@ -59,7 +59,7 @@
     },
     "packages/tss-effect-serverfn": {
       "name": "@rc312/tss-effect-serverfn",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@babel/core": "^7.29.7",
         "@babel/types": "^7.29.8",
