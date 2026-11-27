@@ -17,7 +17,11 @@ import {
 } from "effect";
 import { describe, expect } from "vitest";
 
-import { makeWithDriver, SnowflakeError } from "../src/index.ts";
+import {
+  makeWithDriver,
+  SnowflakeError,
+  SnowflakeOperation,
+} from "../src/index.ts";
 import { fixture, options, secret } from "./fixture.ts";
 
 const finalizers = (scope: Scope.Scope) =>
@@ -282,6 +286,37 @@ describe("Snowflake resource failures", () => {
           })
         ).pipe(Effect.provide(f.layer));
       })
+  );
+
+  it.effect("sanitizes an error while reading a query iterator result", () =>
+    Effect.gen(function* readInvalidIteratorResult() {
+      const f = fixture();
+
+      f.readerFactory = () => {
+        const reader = RecordBatchReader.from(tableToIPC(f.result));
+        reader.next = () => ({
+          done: false,
+          get value(): never {
+            throw new Error(secret);
+          },
+        });
+
+        return reader;
+      };
+
+      yield* Effect.scoped(
+        Effect.gen(function* failReadingValue() {
+          const db = yield* makeWithDriver(options);
+
+          const error = yield* db.query("read").pipe(Effect.flip);
+
+          expect(error).toBeInstanceOf(SnowflakeError);
+          expect(error.operation).toBe(SnowflakeOperation.QueryRead);
+          expect(error.message).not.toContain(secret);
+          expect(f.events.at(-1)).toBe("statement.close");
+        })
+      ).pipe(Effect.provide(f.layer));
+    })
   );
 
   for (const streaming of [false, true]) {

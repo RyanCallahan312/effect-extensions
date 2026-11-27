@@ -22,7 +22,14 @@ const readBatch = (
   operation:
     | typeof SnowflakeOperation.QueryRead
     | typeof SnowflakeOperation.StreamRead
-) => call(operation, () => Promise.resolve(source.next()));
+) =>
+  call(operation, async () => {
+    const result = await source.next();
+
+    return result.done
+      ? ({ done: true } as const)
+      : ({ done: false, value: result.value } as const);
+  });
 
 const collectBatches = Effect.fnUntraced(function* collectQueryBatches(
   source: Reader
