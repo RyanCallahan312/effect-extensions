@@ -20,20 +20,20 @@
       "name": "@rc312/effect-aws-imds",
       "version": "0.2.0",
       "devDependencies": {
-        "@effect/vitest": "^4.1.2",
+        "@effect/vitest": "^4.1.7",
         "@types/node": "^26.6.5",
-        "effect": "^4.1.2",
+        "effect": "^4.1.7",
         "vitest": "^5.0.4",
       },
       "peerDependencies": {
-        "effect": "^4.1.2",
+        "effect": "^4.1.7",
       },
     },
     "packages/effect-aws-imds/examples/instance-info": {
       "name": "@example/imds-instance-info",
       "dependencies": {
         "@rc312/effect-aws-imds": "workspace:*",
-        "effect": "^4.1.2",
+        "effect": "^4.1.7",
       },
       "devDependencies": {
         "@types/node": "^26.6.5",
@@ -47,14 +47,14 @@
         "@apache-arrow/adbc-driver-manager": "~0.24.0",
       },
       "devDependencies": {
-        "@effect/vitest": "^4.1.2",
+        "@effect/vitest": "^4.1.7",
         "@types/node": "^26.6.5",
         "@vitest/coverage-v8": "5.0.4",
         "vitest": "^5.0.4",
       },
       "peerDependencies": {
         "apache-arrow": "^21.1.0",
-        "effect": "^4.1.2",
+        "effect": "^4.1.7",
       },
     },
     "packages/tss-effect-serverfn": {
@@ -66,7 +66,7 @@
         "@standard-schema/spec": "^1.1.0",
       },
       "devDependencies": {
-        "@effect/vitest": "^4.1.2",
+        "@effect/vitest": "^4.1.7",
         "@playwright/test": "^1.64.1",
         "@tanstack/react-router": "1.170.44",
         "@tanstack/start-storage-context": "^1.167.39",
@@ -80,7 +80,7 @@
       "peerDependencies": {
         "@tanstack/react-start": "^1.169.2",
         "@tanstack/router-core": "^1.171.37",
-        "effect": "^4.1.2",
+        "effect": "^4.1.7",
         "vite": "^8.3.4",
       },
       "optionalPeers": [
@@ -93,7 +93,7 @@
         "@rc312/tss-effect-serverfn": "workspace:*",
         "@tanstack/react-router": "1.170.44",
         "@tanstack/react-start": "1.169.2",
-        "effect": "^4.1.2",
+        "effect": "^4.1.7",
         "react": "19.3.1",
         "react-dom": "19.3.1",
       },
@@ -110,7 +110,7 @@
         "@rc312/tss-effect-serverfn": "workspace:*",
         "@tanstack/react-router": "1.170.44",
         "@tanstack/react-start": "1.169.2",
-        "effect": "^4.1.2",
+        "effect": "^4.1.7",
         "react": "19.3.1",
         "react-dom": "19.3.1",
       },
@@ -237,7 +237,7 @@
 
     "@effect/tsgo-win32-x64": ["@effect/tsgo-win32-x64@0.67.5", "", { "os": "win32", "cpu": "x64" }, "sha512-KgCzldADMkw2uHPU995Sfaf+YObqciYh5Kb1A6LHigs6p7jonPYHEpZp2uN6nSiyt0BB6pX/wZJiKF2rhpqRcg=="],
 
-    "@effect/vitest": ["@effect/vitest@4.1.2", "", { "peerDependencies": { "effect": "^4.1.2", "vitest": ">=5.0.0 <6.0.0" } }, "sha512-JJPwAHkJHxvM/woW9mMW/khjasAHcmwWdOMAgMy16rfqsxcVhFDnrRsvN9VI2+kMv8zDCCyBE2q1n5hzZlfE0w=="],
+    "@effect/vitest": ["@effect/vitest@4.1.7", "", { "peerDependencies": { "effect": "^4.1.7", "vitest": ">=5.0.0 <6.0.0" } }, "sha512-4Rj7db3Zol7HtCkuQ2KZ26KrbIWIKAS2rpvH5s3drB1sMZh93nSaK6zXZ6EOtMtWl2CM/flz7tJ8ADaMCRHUWw=="],
 
     "@example/basic": ["@example/basic@workspace:packages/tss-effect-serverfn/examples/basic"],
 
@@ -581,7 +581,7 @@
 
     "diff": ["diff@9.0.0", "", {}, "sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw=="],
 
-    "effect": ["effect@4.1.2", "", {}, "sha512-d3Oah1WyKxFLFh19yWheS5IXIVaITzxZ71JkE1rkUozq/6EcJSU5nPk5bF2QrSygZ3SQoiNQB8TsxFriyMeMaQ=="],
+    "effect": ["effect@4.1.7", "", {}, "sha512-8QUe2XO3auHF5r7+bfIDWxyXlLA0sso4Sia1QYP+vrYA7qb3sq1u2eJmhyXGmKc8yZ+TY2SNxPozeMdyKmWing=="],
 
     "electron-to-chromium": ["electron-to-chromium@1.5.456", "", {}, "sha512-8hboqI6xesozteFb8aa7OGknvxUtTeRJLz0FoePysUEh/oWbddykIGdgpEJRbPRg/nIMfBf2DFos+H2MtvJl2A=="],
 

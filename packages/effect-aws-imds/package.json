@@ -30,13 +30,13 @@
     "prepack": "bun run build"
   },
   "devDependencies": {
-    "@effect/vitest": "^4.1.2",
+    "@effect/vitest": "^4.1.7",
     "@types/node": "^26.6.5",
-    "effect": "^4.1.2",
+    "effect": "^4.1.7",
     "vitest": "^5.0.4"
   },
   "peerDependencies": {
-    "effect": "^4.1.2"
+    "effect": "^4.1.7"
   },
   "engines": {
     "node": ">=22.19.0"
