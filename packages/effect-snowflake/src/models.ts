@@ -62,7 +62,8 @@ export interface SnowflakeSession {
    * @param sql Trusted SQL text with `?` placeholders; values are never interpolated.
    * @param parameters Arrow columns in placeholder order, normally one parameter row.
    * @returns A lazy Effect that owns a fresh statement and reader until collection ends.
-   * Native errors become `SnowflakeError`; cleanup failures remain defects.
+   * Native errors become `SnowflakeError`. Cleanup failures remain defects.
+   * Interruption waits for the current native read and stops further reads.
    */
   readonly query: (
     sql: string,
@@ -93,6 +94,31 @@ export interface SnowflakeSession {
   ) => Stream.Stream<RecordBatch, SnowflakeError>;
 }
 
+/** Driver acknowledgments and connection state at the end of a transaction attempt. */
+export interface SnowflakeTransactionOutcome {
+  /**
+   * `notStarted` means the callback was never entered. `committed` means
+   * the driver acknowledged commit. `rolledBack` means the driver acknowledged
+   * rollback and no commit was attempted. A failed commit or rollback is `unknown`.
+   */
+  readonly status: "notStarted" | "committed" | "rolledBack" | "unknown";
+  /** Whether the client still accepts work at finalization. Its scope remains caller-owned. */
+  readonly connectionReusable: boolean;
+}
+
+export interface SnowflakeTransactionOptions {
+  /**
+   * Observe the outcome once while the transaction still holds the connection.
+   * Runs after finalization even when the attempt fails or is interrupted.
+   * Requires the attempt to have acquired the connection and entered its
+   * transaction lifecycle. Keep this effect short and independent of this client.
+   * An observer defect becomes part of the transaction cause.
+   */
+  readonly onOutcome?: (
+    outcome: SnowflakeTransactionOutcome
+  ) => Effect.Effect<void>;
+}
+
 /**
  * A scoped connection with exclusive transaction callbacks.
  * @since 0.1.0
@@ -104,7 +130,8 @@ export interface SnowflakeClient extends SnowflakeSession {
    * client methods automatically use the active session on this fiber.
    */
   readonly withTransaction: <A, E, R>(
-    self: Effect.Effect<A, E, R>
+    self: Effect.Effect<A, E, R>,
+    options?: SnowflakeTransactionOptions
   ) => Effect.Effect<A, E | SnowflakeError, R>;
 
   /**
@@ -121,6 +148,7 @@ export interface SnowflakeClient extends SnowflakeSession {
    * active transaction session. Nested transactions fail with `transaction.nested`.
    */
   readonly transaction: <A, E, R>(
-    use: (session: SnowflakeSession) => Effect.Effect<A, E, R>
+    use: (session: SnowflakeSession) => Effect.Effect<A, E, R>,
+    options?: SnowflakeTransactionOptions
   ) => Effect.Effect<A, E | SnowflakeError, R>;
 }

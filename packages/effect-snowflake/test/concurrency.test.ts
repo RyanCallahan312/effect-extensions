@@ -4,6 +4,7 @@ import { Cause, Deferred, Effect, Exit, Fiber, Scope, Stream } from "effect";
 import { describe, expect } from "vitest";
 
 import { makeWithDriver, SnowflakeError } from "../src/index.ts";
+import type { SnowflakeTransactionOutcome } from "../src/index.ts";
 import { fixture, options, secret } from "./fixture.ts";
 
 describe("Snowflake ownership races", () => {
@@ -123,13 +124,21 @@ describe("Snowflake ownership races", () => {
       Effect.gen(function* interruptCommit() {
         const f = fixture();
         const gate = f.pause("commit");
+        const outcomes: SnowflakeTransactionOutcome[] = [];
+
         yield* Effect.scoped(
           Effect.gen(function* finishCommitBeforeReuse() {
             const db = yield* makeWithDriver(options);
 
             const transaction = yield* db
-              .execute("insert")
-              .pipe(db.withTransaction, Effect.forkChild);
+              .withTransaction(db.execute("insert"), {
+                onOutcome: (outcome) =>
+                  Effect.sync(() => {
+                    outcomes.push(outcome);
+                    f.events.push("outcome");
+                  }),
+              })
+              .pipe(Effect.forkChild);
 
             yield* Effect.promise(() => gate.entered);
 
@@ -152,11 +161,60 @@ describe("Snowflake ownership races", () => {
             ).toBe(true);
             expect(reusedEarly).toBe(false);
             expect(f.events).not.toContain("rollback");
+            expect(outcomes).toEqual([
+              { connectionReusable: true, status: "committed" },
+            ]);
             expect(f.events.indexOf("autocommit:true")).toBeLessThan(
+              f.events.indexOf("outcome")
+            );
+            expect(f.events.indexOf("outcome")).toBeLessThan(
               f.events.indexOf("sql:after commit")
             );
           })
         ).pipe(Effect.provide(f.layer));
+      })
+  );
+
+  it.effect(
+    "reports a confirmed commit as nonreusable when the client scope closes",
+    () =>
+      Effect.gen(function* closeDuringCommit() {
+        const f = fixture();
+        const gate = f.pause("commit");
+        const outcomes: SnowflakeTransactionOutcome[] = [];
+        const owner = yield* Scope.make("parallel");
+
+        const db = yield* makeWithDriver(options).pipe(
+          Scope.provide(owner),
+          Effect.provide(f.layer)
+        );
+
+        const transaction = yield* db
+          .transaction(() => Effect.void, {
+            onOutcome: (outcome) =>
+              Effect.sync(() => {
+                outcomes.push(outcome);
+              }),
+          })
+          .pipe(Effect.exit, Effect.forkChild);
+
+        yield* Effect.promise(() => gate.entered);
+
+        const closing = yield* Scope.close(owner, Exit.void).pipe(
+          Effect.forkChild
+        );
+
+        yield* Effect.yieldNow;
+        gate.release();
+        yield* Fiber.join(closing);
+
+        const exit = yield* Fiber.join(transaction);
+        expect(Exit.isFailure(exit) && Cause.hasInterrupts(exit.cause)).toBe(
+          true
+        );
+        expect(outcomes).toEqual([
+          { connectionReusable: false, status: "committed" },
+        ]);
       })
   );
 
