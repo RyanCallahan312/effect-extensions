@@ -4,6 +4,8 @@ import { Effect, flow } from "effect";
 import { AdbcDriver } from "../adbc-driver.ts";
 import type { Connection as NativeConnection } from "../adbc-driver.ts";
 import type { SnowflakeOptions } from "../models.ts";
+import { SnowflakeOperation } from "../operations.ts";
+import type { SnowflakeOperationLabel } from "../operations.ts";
 import { failure } from "../snowflake-error.ts";
 import type { SnowflakeError } from "../snowflake-error.ts";
 import { configuration } from "./configuration.ts";
@@ -17,7 +19,7 @@ export interface Connection {
   readonly isOpen: () => boolean;
   readonly isHealthy: () => boolean;
   readonly cleanup: <A>(
-    operation: string,
+    operation: SnowflakeOperationLabel,
     run: () => Promise<A>
   ) => Effect.Effect<A>;
   readonly setAutoCommit: (
@@ -27,17 +29,17 @@ export interface Connection {
 
 /** Called inside the client's private sequential scope. Dependencies are captured once. */
 export const make = Effect.fnUntraced(function* acquireConnection(
-  options: SnowflakeOptions
+  options: SnowflakeOptions,
+  isOwnerOpen: () => boolean
 ) {
   const driver = yield* AdbcDriver;
   const owner = yield* Effect.scope;
 
   const config = yield* Effect.try({
-    catch: failure("options"),
+    catch: failure(SnowflakeOperation.Options),
     try: () => configuration(options),
   });
 
-  let open = true;
   let healthy = true;
 
   const invalidate = Effect.sync(() => {
@@ -54,29 +56,25 @@ export const make = Effect.fnUntraced(function* acquireConnection(
 
   const database = yield* Effect.acquireRelease(
     driver.open(config),
-    (resource) => cleanup("database.close", () => resource.close())
+    (resource) =>
+      cleanup(SnowflakeOperation.DatabaseClose, () => resource.close())
   );
 
   const native = yield* Effect.acquireRelease(
-    call("connect", () => database.connect()),
-    (resource) => cleanup("connection.close", () => resource.close())
-  );
-
-  yield* Effect.addFinalizer(() =>
-    Effect.sync(() => {
-      open = false;
-    })
+    call(SnowflakeOperation.Connect, () => database.connect()),
+    (resource) =>
+      cleanup(SnowflakeOperation.ConnectionClose, () => resource.close())
   );
 
   return {
     cleanup,
     isHealthy: () => healthy,
-    isOpen: () => open && healthy,
+    isOpen: () => isOwnerOpen() && healthy,
     native,
     owner,
     setAutoCommit: (enabled: boolean) =>
       Effect.try({
-        catch: failure("transaction.autocommit"),
+        catch: failure(SnowflakeOperation.TransactionAutoCommit),
         try: () => native.setAutoCommit(enabled),
       }).pipe(Effect.tapError(() => invalidate)),
   } satisfies Connection;

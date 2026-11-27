@@ -1,6 +1,6 @@
-import type { RecordBatch } from "apache-arrow";
-import { Cause, Effect, Exit, Fiber, Scope, Stream } from "effect";
+import { Cause, Effect, Exit, Fiber, Scope } from "effect";
 
+import { SnowflakeOperation } from "../operations.ts";
 import { failure } from "../snowflake-error.ts";
 import type { SnowflakeError } from "../snowflake-error.ts";
 
@@ -92,13 +92,13 @@ export const owned = <A, E, R>(
           ({ fiber }) => Fiber.join(fiber),
           releaseOperation
         )
-      : Effect.fail(failure("closed")())
+      : Effect.fail(failure(SnowflakeOperation.Closed)())
   );
 
 // Finalizers and concurrent callers must join the same teardown. Scope.close
 // marks a scope closed before its finalizers settle, so it cannot provide this
 // join by itself. Keep the parent registration attached until teardown finishes.
-const makeLifetime = Effect.fnUntraced(function* makeOwnedLifetime(
+export const acquireLifetime = Effect.fnUntraced(function* makeOwnedLifetime(
   owner: Scope.Scope
 ) {
   const registration = yield* Scope.fork(owner, "sequential");
@@ -135,48 +135,17 @@ const makeLifetime = Effect.fnUntraced(function* makeOwnedLifetime(
   return { close, isOpen: () => open, resources, scope };
 });
 
-const acquireOwnedStream = Effect.fnUntraced(function* acquireStreamLifetime(
-  stream: Stream.Stream<RecordBatch, SnowflakeError>,
-  owner: Scope.Scope,
-  isOpen: () => boolean
-) {
-  if (!isOpen()) {
-    return yield* failure("closed")();
-  }
-
-  const lifetime = yield* Effect.acquireRelease(
-    makeLifetime(owner),
-    (resource, exit) => resource.close(exit)
-  );
-
-  const active = () => lifetime.isOpen() && isOpen();
-
-  const pull = yield* owned(
-    Stream.toPull(stream).pipe(Scope.provide(lifetime.resources)),
-    lifetime.scope,
-    active
-  );
-
-  return Stream.fromPull(Effect.succeed(owned(pull, lifetime.scope, active)));
-});
-
-export const ownedStream = (
-  stream: Stream.Stream<RecordBatch, SnowflakeError>,
-  owner: Scope.Scope,
-  isOpen: () => boolean
-) => Stream.unwrap(acquireOwnedStream(stream, owner, isOpen));
-
 /** Join interrupted acquisition before releasing its late native resources. */
 export const acquireOwner = Effect.fnUntraced(function* acquireClientOwner<
   A,
   E,
   R,
->(self: Effect.Effect<A, E, R>) {
+>(acquire: (isOwnerOpen: () => boolean) => Effect.Effect<A, E, R>) {
   return yield* Effect.acquireUseRelease(
-    makeLifetime(yield* Effect.scope),
+    acquireLifetime(yield* Effect.scope),
     (lifetime) =>
       owned(
-        self.pipe(Scope.provide(lifetime.resources)),
+        acquire(lifetime.isOpen).pipe(Scope.provide(lifetime.resources)),
         lifetime.scope,
         lifetime.isOpen
       ),

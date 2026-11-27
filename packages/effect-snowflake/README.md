@@ -134,13 +134,24 @@ Only the callback is interruptible. Once commit starts, the adapter finishes com
 
 Captured client methods automatically use the active transaction session on the current fiber. Transactions do not nest; nesting fails with operation `transaction.nested`. Snowflake DDL implicitly commits: use the transaction helper for DML/query work and create tables before the transaction. A transport failure during commit can leave its remote outcome ambiguous; the adapter does not retry it.
 
+Applications that manage a pool can pass `{ onOutcome }` to `transaction` or `withTransaction`. The observer runs after finalization and before the client releases the connection, even if a started attempt fails or is interrupted. It receives a `SnowflakeTransactionOutcome` with a `status` and a `connectionReusable` flag. Keep the observer short and independent of the same client.
+
+| Status | What the adapter observed |
+| --- | --- |
+| `notStarted` | The attempt ended before the transaction callback ran. |
+| `committed` | The driver acknowledged commit. This includes a commit followed by an autocommit restoration failure. |
+| `rolledBack` | The driver acknowledged rollback and the adapter did not attempt commit. |
+| `unknown` | Commit or rollback failed. A subsequent successful rollback leaves an earlier failed commit ambiguous. |
+
+`connectionReusable` reports whether the client accepts further work at finalization. The application still owns its connection scope and decides whether to reuse it or retry the operation. The transaction keeps its usual success, failure, and interruption behavior. If the observer defects, its defect is included in the transaction cause.
+
 ## Lifetime, interruption, and errors
 
 The database, connection, statements, and readers have explicit scoped ownership. The client owns a private sequential scope even when its parent scope finalizes in parallel. Scope closure interrupts and joins active acquisition and operations before closing the connection and database, including a connection returned after shutdown begins. Failed acquisition closes and detaches its child scope immediately. Client and transaction-session reuse after closure fails.
 
-ADBC JavaScript 0.24 has no cancellation method or `AbortSignal` support. Native acquisition, execution, and batch reads are therefore awaited uninterruptibly before their resources can be released. An Effect interruption or timeout can wait for an in-flight native call to settle. Configure driver login, request, and network timeouts to bound those waits. The adapter cannot guarantee an immediate remote cancellation or a bounded shutdown if native calls never settle.
+ADBC JavaScript 0.24 has no cancellation method or `AbortSignal` support. Native acquisition, execution, and batch reads are therefore awaited uninterruptibly before their resources can be released. An Effect interruption or timeout can wait for an in-flight native call to settle. An interrupted query stops collecting batches after the in-flight read settles. Configure driver login, request, and network timeouts to bound those waits. The adapter cannot guarantee an immediate remote cancellation or a bounded shutdown if native calls never settle.
 
-`SnowflakeError` exposes a safe `operation` and generic `message`. Raw driver messages, SQL, binds, connection options, and native error causes are excluded. Public operations have tracing spans without sensitive query attributes. Driver logging is configured by the application and is outside this adapter's error sanitization.
+`SnowflakeError` exposes a safe `operation` and generic `message`. Import `SnowflakeOperation` to compare against the stable labels emitted by the built-in client and driver, such as `SnowflakeOperation.TransactionCommit`. The error schema accepts string labels from custom drivers. Raw driver messages, SQL, binds, connection options, and native error causes are excluded. Public operations have tracing spans without sensitive query attributes. Driver logging is configured by the application and is outside this adapter's error sanitization.
 
 For a custom loader or deterministic test, use `makeWithDriver` with the `AdbcDriver` service from `@rc312/effect-snowflake/adbc-driver`. This structural boundary replaces only native resources; Arrow processing and Effect ownership remain real. `make` supplies the default native loader automatically.
 

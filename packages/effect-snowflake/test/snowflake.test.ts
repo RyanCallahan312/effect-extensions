@@ -17,8 +17,17 @@ import {
 } from "effect";
 import { describe, expect } from "vitest";
 
-import { make, makeWithDriver, SnowflakeError } from "../src/index.ts";
-import type { SnowflakeClient, SnowflakeSession } from "../src/index.ts";
+import {
+  make,
+  makeWithDriver,
+  SnowflakeError,
+  SnowflakeOperation,
+} from "../src/index.ts";
+import type {
+  SnowflakeClient,
+  SnowflakeSession,
+  SnowflakeTransactionOutcome,
+} from "../src/index.ts";
 import { fixture, options, secret } from "./fixture.ts";
 
 describe("Snowflake ADBC client", () => {
@@ -328,7 +337,7 @@ describe("Snowflake ADBC client", () => {
             .transaction(() => Effect.succeed(42))
             .pipe(Effect.flip);
 
-          expect(error.operation).toBe("transaction.commit");
+          expect(error.operation).toBe(SnowflakeOperation.TransactionCommit);
           expect(f.events.slice(-3)).toEqual([
             "commit",
             "rollback",
@@ -658,6 +667,67 @@ describe("Snowflake ADBC client", () => {
     )
   );
 
+  const outcomeCases = [
+    {
+      abort: false,
+      expected: { connectionReusable: true, status: "committed" },
+      rejection: undefined,
+    },
+    {
+      abort: true,
+      expected: { connectionReusable: true, status: "rolledBack" },
+      rejection: undefined,
+    },
+    {
+      abort: false,
+      expected: { connectionReusable: true, status: "unknown" },
+      rejection: "commit",
+    },
+    {
+      abort: true,
+      expected: { connectionReusable: false, status: "unknown" },
+      rejection: "rollback",
+    },
+  ] as const;
+
+  for (const { abort, rejection, expected } of outcomeCases) {
+    it.effect(
+      `reports ${expected.status} with reusable=${expected.connectionReusable}`,
+      () =>
+        Effect.gen(function* reportOutcome() {
+          const f = fixture();
+          const outcomes: SnowflakeTransactionOutcome[] = [];
+
+          if (rejection !== undefined) {
+            f.rejections.add(rejection);
+          }
+
+          yield* Effect.scoped(
+            Effect.gen(function* runTransaction() {
+              const db = yield* makeWithDriver(options);
+
+              const exit = yield* db
+                .transaction(
+                  () => (abort ? Effect.fail("abort") : Effect.succeed(1)),
+                  {
+                    onOutcome: (outcome) =>
+                      Effect.sync(() => {
+                        outcomes.push(outcome);
+                      }),
+                  }
+                )
+                .pipe(Effect.exit);
+
+              expect(Exit.isSuccess(exit)).toBe(
+                !abort && rejection === undefined
+              );
+              expect(outcomes).toEqual([expected]);
+            })
+          ).pipe(Effect.provide(f.layer));
+        })
+    );
+  }
+
   for (const failed of ["autocommit:false", "autocommit:true"]) {
     it.effect(`invalidates the client after failed ${failed}`, () =>
       Effect.gen(function* testInvalidatesTheClientAfterFailedFailed() {
@@ -667,14 +737,28 @@ describe("Snowflake ADBC client", () => {
           Effect.gen(function* failAutocommit() {
             const db = yield* makeWithDriver(options);
 
+            const outcomes: SnowflakeTransactionOutcome[] = [];
+
             const exit = yield* db
-              .transaction(() => Effect.succeed(1))
+              .transaction(() => Effect.succeed(1), {
+                onOutcome: (outcome) =>
+                  Effect.sync(() => {
+                    outcomes.push(outcome);
+                  }),
+              })
               .pipe(Effect.exit);
 
             expect(Exit.isFailure(exit)).toBe(true);
+            expect(outcomes).toEqual([
+              {
+                connectionReusable: false,
+                status:
+                  failed === "autocommit:false" ? "notStarted" : "committed",
+              },
+            ]);
             expect(
               (yield* db.execute("unsafe").pipe(Effect.flip)).operation
-            ).toBe("closed");
+            ).toBe(SnowflakeOperation.Closed);
           })
         ).pipe(Effect.provide(f.layer));
       })

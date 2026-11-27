@@ -1,6 +1,7 @@
 import { Context, Effect, Option, Semaphore, Stream } from "effect";
 
 import type { SnowflakeClient, SnowflakeSession } from "../models.ts";
+import { SnowflakeOperation } from "../operations.ts";
 import { failure } from "../snowflake-error.ts";
 import type { Connection } from "./connection.ts";
 import * as Session from "./session.ts";
@@ -33,17 +34,17 @@ export const make = Effect.fnUntraced(function* makeClient(
 
   const runTransaction = Transaction.make(connection, lock);
 
-  const transaction: SnowflakeClient["transaction"] = <A, E, R>(
-    use: (session: SnowflakeSession) => Effect.Effect<A, E, R>
-  ) =>
+  const transaction: SnowflakeClient["transaction"] = (use, options) =>
     Effect.serviceOption(transactionSession).pipe(
       Effect.flatMap((current) => {
         if (Option.isSome(current)) {
-          return Effect.fail(failure("transaction.nested")());
+          return Effect.fail(failure(SnowflakeOperation.TransactionNested)());
         }
 
-        return runTransaction((session) =>
-          Effect.provideService(use(session), transactionSession, session)
+        return runTransaction(
+          (session) =>
+            Effect.provideService(use(session), transactionSession, session),
+          options
         );
       })
     );
@@ -64,6 +65,6 @@ export const make = Effect.fnUntraced(function* makeClient(
         )
       ),
     transaction,
-    withTransaction: (self) => transaction(() => self),
+    withTransaction: (self, options) => transaction(() => self, options),
   };
 });

@@ -1,6 +1,6 @@
 {
   "name": "@rc312/effect-snowflake",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Scoped Effect 4 Snowflake client with Apache Arrow ADBC queries, streams, and transactions.",
   "license": "MIT",
   "repository": {

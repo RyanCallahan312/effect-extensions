@@ -1,6 +1,12 @@
 import { Effect, Exit, Semaphore } from "effect";
 
-import type { SnowflakeClient, SnowflakeSession } from "../models.ts";
+import type {
+  SnowflakeClient,
+  SnowflakeSession,
+  SnowflakeTransactionOptions,
+  SnowflakeTransactionOutcome,
+} from "../models.ts";
+import { SnowflakeOperation } from "../operations.ts";
 import { failure } from "../snowflake-error.ts";
 import type { Connection } from "./connection.ts";
 import { asCleanup, owned } from "./lifecycle.ts";
@@ -36,17 +42,16 @@ export const make = (
   const begin = Effect.suspend(() =>
     connection.isOpen()
       ? connection.setAutoCommit(false)
-      : Effect.fail(failure("closed")())
+      : Effect.fail(failure(SnowflakeOperation.Closed)())
   );
 
-  const commit = Effect.suspend(() =>
-    connection.isHealthy()
-      ? call("transaction.commit", () => connection.native.commit())
-      : Effect.fail(failure("transaction.invalidated")())
+  const nativeCommit = call(SnowflakeOperation.TransactionCommit, () =>
+    connection.native.commit()
   );
 
-  const rollback = connection.cleanup("transaction.rollback", () =>
-    connection.native.rollback()
+  const nativeRollback = connection.cleanup(
+    SnowflakeOperation.TransactionRollback,
+    () => connection.native.rollback()
   );
 
   const restoreAutoCommit = Effect.suspend(() =>
@@ -55,33 +60,73 @@ export const make = (
       : Effect.void
   );
 
-  const rollbackOnFailure = (exit: Exit.Exit<unknown, unknown>) =>
-    Exit.isFailure(exit) ? rollback : Effect.void;
-
-  const complete = <A, E, R>(self: Effect.Effect<A, E, R>) =>
-    self.pipe(
-      Effect.tap(() => commit),
-      Effect.onExit((exit) => rollbackOnFailure(exit)),
-      Effect.ensuring(restoreAutoCommit)
-    );
-
   const runBody = <A, E, R>(
     use: (session: SnowflakeSession) => Effect.Effect<A, E, R>
   ) => acquireSession(connection).pipe(Effect.flatMap(use), Effect.scoped);
 
   const transact = <A, E, R>(
-    use: (session: SnowflakeSession) => Effect.Effect<A, E, R>
+    use: (session: SnowflakeSession) => Effect.Effect<A, E, R>,
+    options?: SnowflakeTransactionOptions
   ) =>
     Effect.uninterruptibleMask((restore) => {
-      // Only the callback is interruptible; its scope closes before commit.
-      const body = restore(runBody(use));
+      let status: SnowflakeTransactionOutcome["status"] = "notStarted";
 
-      return begin.pipe(Effect.andThen(complete(body)));
+      const commit = Effect.suspend(() =>
+        connection.isHealthy()
+          ? nativeCommit.pipe(
+              Effect.onExit((exit) =>
+                Effect.sync(() => {
+                  status = Exit.isSuccess(exit) ? "committed" : "unknown";
+                })
+              )
+            )
+          : Effect.fail(failure(SnowflakeOperation.TransactionInvalidated)())
+      );
+
+      const rollback = nativeRollback.pipe(
+        Effect.onExit((exit) =>
+          Effect.sync(() => {
+            // A successful rollback cannot resolve an earlier failed commit.
+            status =
+              status === "unknown" || Exit.isFailure(exit)
+                ? "unknown"
+                : "rolledBack";
+          })
+        )
+      );
+
+      // The callback is interruptible and its scope closes before commit.
+      const body = restore(runBody(use)).pipe(
+        Effect.tap(() => commit),
+        Effect.onExit((exit) =>
+          Exit.isFailure(exit) ? rollback : Effect.void
+        ),
+        Effect.ensuring(restoreAutoCommit)
+      );
+
+      const attempt = begin.pipe(Effect.andThen(body));
+      const onOutcome = options?.onOutcome;
+
+      return onOutcome === undefined
+        ? attempt
+        : attempt.pipe(
+            Effect.ensuring(
+              Effect.suspend(() =>
+                onOutcome({
+                  connectionReusable: connection.isOpen(),
+                  status,
+                })
+              )
+            )
+          );
     });
 
   return Effect.fn("Snowflake.transaction")(
-    <A, E, R>(use: (session: SnowflakeSession) => Effect.Effect<A, E, R>) =>
-      transact(use).pipe(mutex.withPermit, (self) =>
+    <A, E, R>(
+      use: (session: SnowflakeSession) => Effect.Effect<A, E, R>,
+      options?: SnowflakeTransactionOptions
+    ) =>
+      transact(use, options).pipe(mutex.withPermit, (self) =>
         owned(self, connection.owner, connection.isOpen)
       )
   );

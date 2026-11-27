@@ -17,7 +17,11 @@ import {
 } from "effect";
 import { describe, expect } from "vitest";
 
-import { makeWithDriver, SnowflakeError } from "../src/index.ts";
+import {
+  makeWithDriver,
+  SnowflakeError,
+  SnowflakeOperation,
+} from "../src/index.ts";
 import { fixture, options, secret } from "./fixture.ts";
 
 const finalizers = (scope: Scope.Scope) =>
@@ -284,6 +288,37 @@ describe("Snowflake resource failures", () => {
       })
   );
 
+  it.effect("sanitizes an error while reading a query iterator result", () =>
+    Effect.gen(function* readInvalidIteratorResult() {
+      const f = fixture();
+
+      f.readerFactory = () => {
+        const reader = RecordBatchReader.from(tableToIPC(f.result));
+        reader.next = () => ({
+          done: false,
+          get value(): never {
+            throw new Error(secret);
+          },
+        });
+
+        return reader;
+      };
+
+      yield* Effect.scoped(
+        Effect.gen(function* failReadingValue() {
+          const db = yield* makeWithDriver(options);
+
+          const error = yield* db.query("read").pipe(Effect.flip);
+
+          expect(error).toBeInstanceOf(SnowflakeError);
+          expect(error.operation).toBe(SnowflakeOperation.QueryRead);
+          expect(error.message).not.toContain(secret);
+          expect(f.events.at(-1)).toBe("statement.close");
+        })
+      ).pipe(Effect.provide(f.layer));
+    })
+  );
+
   for (const streaming of [false, true]) {
     it.effect(
       `invalidates the connection after ${streaming ? "stream" : "query"} reader cancellation fails`,
@@ -523,6 +558,78 @@ describe("Snowflake resource failures", () => {
         expect(Exit.isFailure(yield* Fiber.join(running))).toBe(true);
         expect(f.events).not.toContain("sql:late");
         expect(f.events.slice(-3)).toEqual([
+          "statement.close",
+          "connection.close",
+          "database.close",
+        ]);
+      })
+  );
+
+  it.effect(
+    "stops query reads after the in-flight batch settles during owner shutdown",
+    () =>
+      Effect.gen(function* stopCollectingOnShutdown() {
+        const f = fixture();
+        const reading = Promise.withResolvers<boolean>();
+        const release = Promise.withResolvers<boolean>();
+        let pulls = 0;
+
+        const source = async function* source() {
+          yield tableToIPC(f.result);
+        };
+
+        f.readerFactory = async () => {
+          const reader = await RecordBatchReader.from(source());
+          const next = reader.next.bind(reader);
+          const cancel = reader.cancel.bind(reader);
+          reader.next = async () => {
+            pulls += 1;
+            reading.resolve(true);
+            await release.promise;
+
+            return next();
+          };
+
+          reader[Symbol.asyncIterator] = () => reader;
+          reader.cancel = () => {
+            f.events.push("reader.cancel");
+
+            return cancel();
+          };
+
+          return reader;
+        };
+
+        const owner = yield* Scope.make("parallel");
+
+        const db = yield* makeWithDriver(options).pipe(
+          Scope.provide(owner),
+          Effect.provide(f.layer)
+        );
+
+        const running = yield* db
+          .query("read")
+          .pipe(Effect.exit, Effect.forkChild);
+
+        yield* Effect.promise(() => reading.promise);
+
+        const closing = yield* Scope.close(owner, Exit.void).pipe(
+          Effect.forkChild
+        );
+
+        yield* Effect.yieldNow;
+        const releasedEarly = f.events.includes("reader.cancel");
+        release.resolve(true);
+        yield* Fiber.join(closing);
+        const exit = yield* Fiber.join(running);
+
+        expect(Exit.isFailure(exit) && Cause.hasInterrupts(exit.cause)).toBe(
+          true
+        );
+        expect(releasedEarly).toBe(false);
+        expect(pulls).toBe(1);
+        expect(f.events.slice(-4)).toEqual([
+          "reader.cancel",
           "statement.close",
           "connection.close",
           "database.close",

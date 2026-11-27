@@ -1,5 +1,7 @@
 import { Schema } from "effect";
 
+import type { SnowflakeOperationLabel } from "./operations.ts";
+
 /**
  * Sanitized native failure with an operation label and a generic message.
  * Raw native messages, SQL, bind values, credentials, and original causes are
@@ -13,5 +15,5 @@ export class SnowflakeError extends Schema.TaggedError<
   { readonly brand: unique symbol }
 >()("SnowflakeError", { message: Schema.String, operation: Schema.String }) {}
 
-export const failure = (operation: string) => () =>
+export const failure = (operation: SnowflakeOperationLabel) => () =>
   new SnowflakeError({ message: `Snowflake ${operation} failed`, operation });

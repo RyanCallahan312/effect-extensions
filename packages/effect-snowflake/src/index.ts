@@ -1,5 +1,5 @@
 import type { RecordBatch, Table } from "apache-arrow";
-import { Config, Context, Effect, flow, pipe, Layer, Stream } from "effect";
+import { Config, Context, Effect, pipe, Layer, Stream } from "effect";
 
 import { layer as driverLayer } from "./adbc-driver.ts";
 import * as Client from "./internal/client.ts";
@@ -9,6 +9,7 @@ import type {
   SnowflakeClient,
   SnowflakeOptions,
   SnowflakeSession,
+  SnowflakeTransactionOptions,
 } from "./models.ts";
 import type { SnowflakeError } from "./snowflake-error.ts";
 
@@ -16,7 +17,13 @@ export type {
   SnowflakeClient,
   SnowflakeOptions,
   SnowflakeSession,
+  SnowflakeTransactionOptions,
+  SnowflakeTransactionOutcome,
 } from "./models.ts";
+
+export { SnowflakeOperation } from "./operations.ts";
+
+export type { SnowflakeOperationLabel } from "./operations.ts";
 
 export { SnowflakeError } from "./snowflake-error.ts";
 
@@ -50,7 +57,10 @@ export class Snowflake extends Context.Service<
  * @since 0.1.0
  */
 export const makeWithDriver = Effect.fn("Snowflake.make")(
-  flow(Connection.make, Effect.flatMap(Client.make), acquireOwner)
+  (options: SnowflakeOptions) =>
+    acquireOwner((isOwnerOpen) =>
+      Connection.make(options, isOwnerOpen).pipe(Effect.flatMap(Client.make))
+    )
 );
 
 /**
@@ -144,8 +154,11 @@ export const stream = (
  * are preserved by the underlying transaction implementation.
  * @since 0.1.0
  */
-export const withTransaction = <A, E, R>(self: Effect.Effect<A, E, R>) =>
+export const withTransaction = <A, E, R>(
+  self: Effect.Effect<A, E, R>,
+  options?: SnowflakeTransactionOptions
+) =>
   pipe(
     Snowflake,
-    Effect.flatMap((client) => client.withTransaction(self))
+    Effect.flatMap((client) => client.withTransaction(self, options))
   );

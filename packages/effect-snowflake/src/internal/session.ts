@@ -5,34 +5,62 @@ import type { Scope, Semaphore } from "effect";
 
 import type { Statement } from "../adbc-driver.ts";
 import type { SnowflakeSession } from "../models.ts";
+import { SnowflakeOperation } from "../operations.ts";
 import { failure } from "../snowflake-error.ts";
 import type { Connection } from "./connection.ts";
-import { owned, ownedStream } from "./lifecycle.ts";
+import { owned } from "./lifecycle.ts";
 import { call } from "./native.ts";
+import { ownedStream } from "./stream.ts";
 
 type Reader = Awaited<ReturnType<Statement["executeQuery"]>>;
 
 const executeStatement = (statement: Statement) =>
-  call("execute", () => statement.executeUpdate());
+  call(SnowflakeOperation.Execute, () => statement.executeUpdate());
 
-const collectBatches = (source: Reader) =>
-  call("query.read", async () => {
-    await source.open();
-    const { schema } = source;
-    const batches: RecordBatch[] = [];
+const readBatch = (
+  source: Reader,
+  operation:
+    | typeof SnowflakeOperation.QueryRead
+    | typeof SnowflakeOperation.StreamRead
+) =>
+  call(operation, async () => {
+    const result = await source.next();
 
-    for await (const batch of source) {
-      batches.push(batch);
-    }
-
-    return new Table(schema, batches);
+    return result.done
+      ? ({ done: true } as const)
+      : ({ done: false, value: result.value } as const);
   });
+
+const collectBatches = Effect.fnUntraced(function* collectQueryBatches(
+  source: Reader
+) {
+  const schema = yield* call(SnowflakeOperation.QueryRead, async () => {
+    await source.open();
+
+    return source.schema;
+  });
+
+  const batches: RecordBatch[] = [];
+
+  // Wait for the current read to settle so interruption can stop the next read.
+  let result = yield* readBatch(source, SnowflakeOperation.QueryRead);
+
+  while (!result.done) {
+    batches.push(result.value);
+    result = yield* readBatch(source, SnowflakeOperation.QueryRead);
+  }
+
+  return yield* Effect.try({
+    catch: failure(SnowflakeOperation.QueryRead),
+    try: () => new Table(schema, batches),
+  });
+});
 
 // fromAsyncIterable installs an unsanitized iterator.return finalizer. The scoped
 // reader.cancel owns cleanup; this pull only reads on downstream demand.
 const streamBatches = (source: Reader) =>
   pipe(
-    call("stream.read", () => Promise.resolve(source.next())),
+    readBatch(source, SnowflakeOperation.StreamRead),
     Effect.flatMap((result) =>
       result.done ? Cause.done() : Effect.succeed([result.value] as const)
     ),
@@ -52,18 +80,27 @@ export const make = (
     parameters?: Table
   ) {
     if (!active()) {
-      return yield* failure("closed")();
+      return yield* failure(SnowflakeOperation.Closed)();
     }
 
     const resource = yield* Effect.acquireRelease(
-      call("statement.create", () => connection.native.createStatement()),
-      (value) => connection.cleanup("statement.close", () => value.close())
+      call(SnowflakeOperation.StatementCreate, () =>
+        connection.native.createStatement()
+      ),
+      (value) =>
+        connection.cleanup(SnowflakeOperation.StatementClose, () =>
+          value.close()
+        )
     );
 
-    yield* call("statement.sql", () => resource.setSqlQuery(sql));
+    yield* call(SnowflakeOperation.StatementSql, () =>
+      resource.setSqlQuery(sql)
+    );
 
     if (parameters !== undefined) {
-      yield* call("statement.bind", () => resource.bind(parameters));
+      yield* call(SnowflakeOperation.StatementBind, () =>
+        resource.bind(parameters)
+      );
     }
 
     return resource;
@@ -76,9 +113,9 @@ export const make = (
     const resource = yield* statement(sql, parameters);
 
     return yield* Effect.acquireRelease(
-      call("query", () => resource.executeQuery()),
+      call(SnowflakeOperation.Query, () => resource.executeQuery()),
       (value) =>
-        connection.cleanup("reader.close", async () => {
+        connection.cleanup(SnowflakeOperation.ReaderClose, async () => {
           await value.cancel();
         })
     );

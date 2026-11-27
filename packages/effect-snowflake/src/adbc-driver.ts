@@ -6,6 +6,7 @@ import type {
 } from "@apache-arrow/adbc-driver-manager";
 import { Context, Effect, Layer } from "effect";
 
+import { SnowflakeOperation } from "./operations.ts";
 import { failure } from "./snowflake-error.ts";
 import type { SnowflakeError } from "./snowflake-error.ts";
 
@@ -69,12 +70,12 @@ export const layer = Layer.succeed(
     open: Effect.fn("Snowflake.AdbcDriver.open")(
       function* openDatabase(options) {
         const { AdbcDatabase } = yield* Effect.tryPromise({
-          catch: failure("driver.load"),
+          catch: failure(SnowflakeOperation.DriverLoad),
           try: () => import("@apache-arrow/adbc-driver-manager"),
         });
 
         return yield* Effect.try({
-          catch: failure("database.open"),
+          catch: failure(SnowflakeOperation.DatabaseOpen),
           try: () => new AdbcDatabase(options),
         });
       }
